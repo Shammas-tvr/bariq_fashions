@@ -1,0 +1,109 @@
+{% extends 'base_admin.html' %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-gray-800" style="font-family: 'Roboto', sans-serif;">{{ page_title }}</h2>
+        <a href="{% url 'admin_transaction_list' %}" 
+           class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300 text-center" 
+           style="font-family: 'Roboto', sans-serif;">
+            Back to List
+        </a>
+    </div>
+
+    <!-- Transaction Detail Card -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
+            <!-- User Details -->
+            <div class="mb-6">
+                <h5 class="text-lg font-semibold text-gray-700 mb-3" style="font-family: 'Roboto', sans-serif;">User Details</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Username:</strong> {{ transaction.wallet.user.username }}
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Email:</strong> {{ transaction.wallet.user.email }}
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Current Wallet Balance:</strong> 
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
+                            {% if transaction.wallet.balance >= 0 %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {{ transaction.wallet.balance|floatformat:2 }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Transaction Details -->
+            <div class="mb-6">
+                <h5 class="text-lg font-semibold text-gray-700 mb-3" style="font-family: 'Roboto', sans-serif;">Transaction Details</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Transaction ID:</strong> <span class="font-mono">{{ transaction.transaction_id }}</span>
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Date:</strong> {{ transaction.created_at|date:"M d, Y H:i" }}
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Type:</strong> {{ transaction.transaction_type|title }}
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Amount:</strong> 
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
+                            {% if transaction.amount >= 0 %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                            {% if transaction.amount >= 0 %}+{% endif %}{{ transaction.amount|floatformat:2 }}
+                        </span>
+                    </p>
+                    <p class="text-gray-600 col-span-1 md:col-span-2" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Description:</strong> {{ transaction.description|default:"No description provided" }}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Order Details (if applicable) -->
+            {% if transaction.order %}
+            <div class="mb-6">
+                <h5 class="text-lg font-semibold text-gray-700 mb-3" style="font-family: 'Roboto', sans-serif;">Order Details</h5>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Order ID:</strong> 
+                        <a href="{% url 'admin_order_detail' transaction.order.order_id %}" 
+                           class="text-blue-600 hover:text-blue-800">{{ transaction.order.order_id }}</a>
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Order Date:</strong> {{ transaction.order.order_date|date:"M d, Y H:i" }}
+                    </p>
+                    <p class="text-gray-600" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Total Amount:</strong> 
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            {{ transaction.order.total_amount|floatformat:2 }}
+                        </span>
+                    </p>
+                    <p class="text-gray-600 col-span-1 md:col-span-2" style="font-family: 'Roboto', sans-serif;">
+                        <strong class="font-medium">Status:</strong> 
+                        {% for item in transaction.order.items.all %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 mr-2">
+                                {{ item.status }}
+                            </span>
+                        {% empty %}
+                            No items found
+                        {% endfor %}
+                    </p>
+                </div>
+                <a href="{% url 'admin_order_detail' transaction.order.order_id %}" 
+                   class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300" 
+                   style="font-family: 'Roboto', sans-serif;">
+                    View Order Details
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

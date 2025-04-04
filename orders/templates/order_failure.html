@@ -1,0 +1,76 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <img src="{% static 'images/payment-failure.png' %}" alt="Payment Failed" class="img-fluid mb-4" style="max-width: 300px;">
+            <h2 class="mb-3">Payment Failed</h2>
+            <p class="text-muted mb-4">We couldn't process your payment for order #{{ order.order_id }}. Please try again.</p>
+            <button id="retry-payment-btn" 
+                    class="btn btn-primary"
+                    data-order-id="{{ order.order_id }}"
+                    data-amount="{{ amount }}"
+                    data-key="{{ razorpay_key }}"
+                    data-currency="{{ currency }}">Retry Payment</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('retry-payment-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    const button = this;
+    const orderId = button.dataset.orderId;
+    
+    fetch(`/orders/retry-payment/${orderId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            var options = {
+                "key": data.key,
+                "amount": data.amount,
+                "currency": data.currency,
+                "order_id": data.razorpay_order_id,
+                "handler": function (response) {
+                    fetch('/orders/verify-payment/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify(response)
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        window.location.href = result.redirect_url;
+                    });
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        window.location.reload();
+                    }
+                }
+            };
+            var rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            window.location.href = data.redirect_url;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to initiate payment retry');
+    });
+});
+</script>
+{% endblock %}

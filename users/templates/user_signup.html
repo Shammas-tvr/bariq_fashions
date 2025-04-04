@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    {% load socialaccount %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bariq - Sign Up</title>
+    <!-- FontAwesome for eye icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .left-section {
+            flex: 1;
+            background: #25a19b;
+            padding: 40px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .bariq-image {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            filter: drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+            transition: transform 0.3s ease;
+        }
+
+        .bariq-image:hover {
+            transform: scale(1.1);
+        }
+
+        .right-section {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            width: 100px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+        }
+
+        .signup-title {
+            font-size: 24px;
+            color: #25a19b;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #6d6565; /* Darker label text */
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 40px 12px 12px; /* Added padding for eye icon */
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background-color: transparent;
+        }
+
+        .input-group input::placeholder {
+            color: #aaa9a9; /* Lighter placeholder text */
+            opacity: 1; /* Ensure full visibility */
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #25a19b;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #666;
+        }
+
+        .toggle-password:hover {
+            color: #25a19b;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-signup {
+            background: #25a19b;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 161, 155, 0.3);
+        }
+
+        .btn-signup:hover {
+            background: #1c7872;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 161, 155, 0.4);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #25a19b;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: #1c7872;
+        }
+
+        .social-signup {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .social-text {
+            color: #1c7872;
+            margin-bottom: 20px;
+        }
+
+        .social-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .social-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .social-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .social-btn img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .password-hint {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                width: 95%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                max-width: 500px;
+            }
+
+            .left-section {
+                padding: 30px;
+                min-height: 250px;
+            }
+
+            .right-section {
+                padding: 30px;
+            }
+
+            .bariq-image {
+                max-width: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .left-section, 
+            .right-section {
+                padding: 20px;
+            }
+
+            .input-group {
+                margin-bottom: 15px;
+            }
+
+            .signup-title {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+
+            .social-buttons {
+                gap: 15px;
+            }
+
+            .social-btn {
+                width: 35px;
+                height: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-section">
+            <img src="{% static 'images/bariq_main.jpg' %}" alt="bariq" class="bariq-image">
+        </div>
+        <div class="right-section">
+            <img src="{% static 'images/bariq_logo.png' %}" alt="bariq_logo" class="logo">
+            <h1 class="signup-title">Sign Up</h1>
+            {% if messages %}
+                <ul id="messages">
+                    {% for message in messages %}
+                        <li style="color: red;">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username">
+                </div>
+                <div class="input-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="input-group">
+                    <label for="password1">Password</label>
+                    <input type="password" id="password1" name="password1" required placeholder="Enter your password">
+                    <span class="toggle-password" onclick="togglePasswordVisibility('password1')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                    <small class="password-hint">Password must be at least 8 characters long and include numbers, letters, and special characters.</small>
+                </div>
+                <div class="input-group">
+                    <label for="password2">Confirm Password</label>
+                    <input type="password" id="password2" name="password2" required placeholder="Confirm your password">
+                    <span class="toggle-password" onclick="togglePasswordVisibility('password2')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                <button type="submit" class="btn btn-signup" name="signup">Sign Up</button>
+            </form>
+            <div class="login-link">
+                Already have an account? <a href="{% url 'userlogin' %}">Log In</a>
+            </div>
+            <div class="social-signup">
+                <p class="social-text">Or sign up using</p>
+                <div class="social-buttons">
+                    <a href="{% provider_login_url 'google' %}" class="social-btn">
+                        <img src="{% static 'images/google_logo.png' %}" alt="Google">
+                    </a>
+                    <a href="{% url 'facebook_auth' %}" class="social-btn">
+                        <img src="{% static 'images/facebook_logo.png' %}" alt="Facebook">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePasswordVisibility(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+
+            // Toggle eye icon
+            const eyeIcon = passwordField.nextElementSibling.querySelector('i');
+            if (type === 'text') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Hide messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.getElementById('messages');
+            if (messages) {
+                setTimeout(function() {
+                    messages.style.display = 'none';
+                }, 2000); // 5000 milliseconds = 3 seconds
+            }
+        });
+    </script>
+</body>
+</html>

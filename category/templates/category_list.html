@@ -1,0 +1,134 @@
+{% extends 'base_admin.html' %}
+{% block title %}Category Management - Your Site{% endblock %}
+{% block header_title %}Category Management{% endblock %}
+{% load static %}
+{% block content %}
+
+<div class="container mx-auto px-4">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold dark:text-white">Categories ({{ total_categories }})</h2>
+        <a href="{% url 'category_add' %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+            + Add Category
+        </a>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Image</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Edit</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {% for category in categories %}
+                    <tr id="categoryRow-{{ category.id }}" data-category-id="{{ category.id }}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ category.id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ category.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                {% if category.image %}
+                                <div class="flex-shrink-0 h-16 w-16">
+                                    <img class="h-16 w-16 rounded-lg object-cover border category-image"
+                                         src="{{ category.image.url }}"
+                                         alt="{{ category.category }}"
+                                         data-original-src="{{ category.image.url }}"
+                                         onerror="handleImageError(this)">
+                                </div>
+                                {% else %}
+                                <span class="text-sm text-gray-500 dark:text-gray-400">No Image</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-300 max-w-xs">{{ category.description|truncatechars:100 }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="status-badge px-3 py-1 rounded-full text-sm {% if category.status == 'active' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ category.status|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="{% url 'category_edit' category.id %}" class="text-blue-500 hover:text-blue-700" title="Edit">
+                                ✏️
+                            </a>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button onclick="toggleStatus('{{ category.id }}')"
+                                    class="status-toggle px-4 py-2 rounded-md {% if category.status == 'active' %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}"
+                                    title="{% if category.status == 'active' %}Block{% else %}Unblock{% endif %}">
+                                {% if category.status == 'active' %}Block{% else %}Unblock{% endif %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
+                            No categories found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4 flex justify-center space-x-1">
+        {% if categories.has_previous %}
+            <a href="?page=1" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-lg hover:bg-gray-100 dark:hover:bg-gray-700">First</a>
+            <a href="?page={{ categories.previous_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Previous</a>
+        {% endif %}
+        <span class="px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+            Page {{ categories.number }} of {{ categories.paginator.num_pages }}
+        </span>
+        {% if categories.has_next %}
+            <a href="?page={{ categories.next_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Next</a>
+            <a href="?page={{ categories.paginator.num_pages }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-lg hover:bg-gray-100 dark:hover:bg-gray-700">Last</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white transform transition-transform duration-300 translate-y-full">
+</div>
+
+<script>
+    function toggleStatus(categoryId) {
+        console.log('Toggling status for category ID:', categoryId);
+        fetch(`/toggle_category_status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `category_id=${categoryId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Status toggled successfully for category ID:', categoryId);
+                const statusBadge = document.querySelector(`#categoryRow-${categoryId} .status-badge`);
+                const statusToggle = document.querySelector(`#categoryRow-${categoryId} .status-toggle`);
+                statusBadge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
+                statusBadge.classList.toggle('bg-green-100', data.new_status === 'active');
+                statusBadge.classList.toggle('text-green-800', data.new_status === 'active');
+                statusBadge.classList.toggle('bg-red-100', data.new_status === 'blocked');
+                statusBadge.classList.toggle('text-red-800', data.new_status === 'blocked');
+                statusToggle.classList.toggle('bg-red-500', data.new_status === 'active');
+                statusToggle.classList.toggle('bg-green-500', data.new_status === 'blocked');
+                statusToggle.innerText = data.new_status === 'active' ? 'Block' : 'Unblock';
+            } else {
+                console.error('Failed to toggle status:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling category status:', error);
+        });
+    }
+</script>
+
+{% endblock %}

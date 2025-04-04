@@ -1,0 +1,378 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bariq - OTP Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.1);
+        }
+
+        .otp-title {
+            font-size: 24px;
+            color: #25a19b;
+            margin-bottom: 20px;
+        }
+
+        .otp-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            text-align: center;
+        }
+
+        .input-group input:focus {
+            border-bottom-color: #25a19b;
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .btn-verify {
+            background: #25a19b;
+            color: white;
+            box-shadow: 0 4px 15px rgba(37, 161, 155, 0.3);
+        }
+
+        .btn-verify:hover {
+            background: #1c7872;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 161, 155, 0.4);
+        }
+
+        .countdown {
+            font-size: 18px;
+            color: #25a19b;
+            margin-bottom: 20px;
+        }
+
+        .resend-link {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .resend-link a {
+            color: #25a19b;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .resend-link a:hover {
+            color: #1c7872;
+        }
+
+       /* Media Queries for different screen sizes */
+       @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+            }
+            .otp-title {
+                font-size: 22px;
+            }
+            .otp-message {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 15px;
+                padding: 20px;
+            }
+            .otp-title {
+                font-size: 20px;
+            }
+            .otp-message {
+                font-size: 12px;
+            }
+            .input-group input {
+                font-size: 14px;
+            }
+            .btn-verify {
+                font-size: 14px;
+                padding: 10px;
+            }
+            .countdown {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .container {
+                padding: 15px;
+            }
+            .otp-title {
+                font-size: 18px;
+            }
+            .otp-message {
+                font-size: 12px;
+            }
+            .input-group input {
+                font-size: 12px;
+            }
+            .btn-verify {
+                font-size: 12px;
+                padding: 8px;
+            }
+            .countdown {
+                font-size: 14px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="{% static 'images/bariq_logo.png' %}" alt="bariq_logo" class="logo">
+        <h1 class="otp-title">OTP Verification</h1>
+        <p class="otp-message">We've sent a 6-digit OTP to your email address.</p>
+
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li style="color: red;">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST" action="{% url 'verify_otp' %}">
+            {% csrf_token %}
+            <div class="input-group">
+                <input type="text" id="otp" name="otp" required placeholder="Enter 6-digit OTP" maxlength="6" pattern="\d{6}" title="Please enter 6 digits">
+            </div>
+            <div class="countdown" id="countdown"></div>
+            <button class="btn btn-verify" type="submit">Verify OTP</button>
+        </form>
+
+        <div class="resend-link">
+            <p>Didn't receive OTP? <a href="javascript:void(0);" id="resend-otp">Resend OTP</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize variables
+        const resendOtpLink = document.getElementById('resend-otp');
+        let timeLeft = 60;
+        let timer = null;
+        let isRequesting = false;
+
+        // Update countdown function - remains unchanged during invalid OTP
+        function updateCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            
+            if (timeLeft > 0) {
+                countdownElement.textContent = `Resend OTP in ${timeLeft} seconds`;
+                timeLeft--;
+            } else {
+                clearInterval(timer);
+                countdownElement.textContent = '';
+                resendOtpLink.classList.remove('disabled');
+                resendOtpLink.style.display = 'inline';
+            }
+        }
+
+        function startResendTimer() {
+            timeLeft = 60;
+            resendOtpLink.classList.add('disabled');
+            resendOtpLink.style.display = 'none';
+            
+            if (timer) {
+                clearInterval(timer);
+            }
+            
+            timer = setInterval(updateCountdown, 1000);
+            updateCountdown();
+        }
+
+        // Initialize timer on page load
+        startResendTimer();
+
+        // Resend OTP event listener
+        resendOtpLink.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            if (isRequesting || resendOtpLink.classList.contains('disabled')) {
+                return;
+            }
+            
+            isRequesting = true;
+            
+            try {
+                const response = await fetch("/resend-otp/", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('success', data.message || 'New OTP has been sent to your email!');
+                    startResendTimer(); // Only reset timer on successful resend
+                    
+                    // Clear existing OTP inputs
+                    const otpInputs = document.querySelectorAll('.otp-digit');
+                    otpInputs.forEach(input => input.value = '');
+                    
+                    // Focus on first input
+                    if (otpInputs.length > 0) {
+                        otpInputs[0].focus();
+                    }
+                } else {
+                    showMessage('error', data.error);
+                }
+            } catch (error) {
+                console.error('Error resending OTP:', error);
+                showMessage('error', 'Failed to send OTP. Please try again later.');
+            } finally {
+                isRequesting = false;
+            }
+        });
+
+        // Improved message display function with guaranteed timeout
+        function showMessage(type, message) {
+            const messageContainer = document.querySelector('.message-container') || createMessageContainer();
+            clearExistingMessages();
+
+            const messageElement = document.createElement('div');
+            messageElement.className = `message-alert ${type}`;
+            messageElement.textContent = message;
+            messageElement.style.padding = '10px';
+            messageElement.style.margin = '10px 0';
+            messageElement.style.borderRadius = '4px';
+            messageElement.style.textAlign = 'center';
+            messageElement.style.opacity = '1';
+            messageElement.style.transition = 'opacity 0.5s ease';
+
+            if (type === 'error') {
+                messageElement.style.backgroundColor = '#fff0f0';
+                messageElement.style.color = '#ff0000';
+                messageElement.style.border = '1px solid #ffcdd2';
+                messageElement.style.fontWeight = '500';
+            } else {
+                messageElement.style.backgroundColor = '#d4edda';
+                messageElement.style.color = '#155724';
+                messageElement.style.border = '1px solid #c3e6cb';
+            }
+
+            messageContainer.appendChild(messageElement);
+
+            // Guaranteed removal after 3 seconds
+            setTimeout(() => {
+                messageElement.style.opacity = '0';
+                setTimeout(() => {
+                    if (messageElement.parentElement) {
+                        messageElement.remove();
+                    }
+                }, 500);
+            }, 2000);
+        }
+
+        // Helper function to create message container
+        function createMessageContainer() {
+            const container = document.createElement('div');
+            container.className = 'message-container';
+            const form = document.querySelector('form');
+            form.parentNode.insertBefore(container, form);
+            return container;
+        }
+
+        // Helper function to clear existing messages
+        function clearExistingMessages() {
+            const existingMessages = document.querySelectorAll('.message-alert');
+            existingMessages.forEach(message => {
+                if (message.parentElement) {
+                    message.remove();
+                }
+            });
+        }
+
+        // Add event listener for OTP validation form
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // Don't reset the timer on form submission
+            // The timer should only reset on successful resend
+        });
+
+        // Add CSS for message transitions
+        const style = document.createElement('style');
+        style.textContent = `
+            .message-container {
+                width: 100%;
+                position: relative;
+                z-index: 1000;
+            }
+            .message-alert {
+                opacity: 1;
+                transition: opacity 0.5s ease;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

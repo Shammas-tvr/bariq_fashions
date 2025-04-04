@@ -1,0 +1,110 @@
+{% extends 'base_admin.html' %}
+{% block title %}User Management - Your Site{% endblock %}
+{% block header_title %}User Management{% endblock %}
+{% load static %}
+{% block content %}
+
+<div class="container mx-auto px-4">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold dark:text-white">Users ({{ total_users }})</h2>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date of Joining</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                    {% for user in users %}
+                    <tr id="userRow-{{ user.id }}" data-user-id="{{ user.id }}">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.date_of_joining }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="status-badge px-3 py-1 rounded-full text-sm {% if user.status == 'active' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ user.status|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
+                            <button onclick="toggleStatus('{{ user.id }}')"
+                                    class="status-toggle px-4 py-2 rounded-md {% if user.status == 'active' %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}"
+                                    title="{% if user.status == 'active' %}Block{% else %}Unblock{% endif %}">
+                                {% if user.status == 'active' %}Block{% else %}Unblock{% endif %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
+                            No users found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4 flex justify-center space-x-1">
+        {% if users.has_previous %}
+            <a href="?page=1" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-lg hover:bg-gray-100 dark:hover:bg-gray-700">First</a>
+            <a href="?page={{ users.previous_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Previous</a>
+        {% endif %}
+        <span class="px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+            Page {{ users.number }} of {{ users.paginator.num_pages }}
+        </span>
+        {% if users.has_next %}
+            <a href="?page={{ users.next_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Next</a>
+            <a href="?page={{ users.paginator.num_pages }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-lg hover:bg-gray-100 dark:hover:bg-gray-700">Last</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white transform transition-transform duration-300 translate-y-full">
+</div>
+
+<script>
+    function toggleStatus(userId) {
+        console.log('Toggling status for user ID:', userId);
+        fetch(`/toggle_user_status/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `user_id=${userId}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                console.log('Status toggled successfully for user ID:', userId);
+                const statusBadge = document.querySelector(`#userRow-${userId} .status-badge`);
+                const statusToggle = document.querySelector(`#userRow-${userId} .status-toggle`);
+                statusBadge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
+                statusBadge.classList.toggle('bg-green-100', data.new_status === 'active');
+                statusBadge.classList.toggle('text-green-800', data.new_status === 'active');
+                statusBadge.classList.toggle('bg-red-100', data.new_status === 'blocked');
+                statusBadge.classList.toggle('text-red-800', data.new_status === 'blocked');
+                statusToggle.classList.toggle('bg-red-500', data.new_status === 'active');
+                statusToggle.classList.toggle('bg-green-500', data.new_status === 'blocked');
+                statusToggle.innerText = data.new_status === 'active' ? 'Block' : 'Unblock';
+            } else {
+                console.error('Failed to toggle status:', data);
+            }
+        })
+        .catch(error => {
+            console.error('Error toggling user status:', error);
+        });
+    }
+</script>
+{% endblock %}

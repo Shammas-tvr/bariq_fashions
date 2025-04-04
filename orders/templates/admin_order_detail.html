@@ -1,0 +1,338 @@
+{% extends 'base_admin.html' %}
+{% block title %}Order Invoice #{{ order.order_id }}{% endblock %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6 no-print">
+        <h2 class="text-2xl font-bold dark:text-white">Order #{{ order.order_id }}</h2>
+        <a href="{% url 'order-list' %}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Orders
+        </a>
+    </div>
+
+    <!-- Invoice Header for Print -->
+    <div class="invoice-header print-only">
+        <h1 class="text-3xl font-bold">Invoice</h1>
+        <p class="text-sm">Order #{{ order.order_id }} - {{ order.order_date|date:"F j, Y" }}</p>
+    </div>
+
+    <!-- Order Info Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Order Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="mb-2"><span class="font-medium dark:text-gray-300">Order ID:</span> <span class="dark:text-white">{{ order.order_id }}</span></p>
+                <p class="mb-2"><span class="font-medium dark:text-gray-300">Order Date:</span> <span class="dark:text-white">{{ order.order_date|date:"F j, Y, g:i a" }}</span></p>
+            </div>
+            <div>
+                <p class="mb-2"><span class="font-medium dark:text-gray-300">Payment Method:</span> <span class="dark:text-white">{{ order.payment_method }}</span></p>
+                <p class="mb-2"><span class="font-medium dark:text-gray-300">Tracking Number:</span> <span class="dark:text-white">{{ order.tracking_number|default:"Not available" }}</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Info Card -->
+    {% if order.address %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Customer Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Customer Details</h4>
+                <p class="mb-1 dark:text-white">{{ order.user.get_full_name|default:order.user.username }}</p>
+                <p class="mb-1 dark:text-white">{{ order.user.email }}</p>
+                <p class="mb-1 dark:text-white">{{ order.address.phone }}</p>
+            </div>
+            <div>
+                <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Shipping Address</h4>
+                <p class="mb-1 dark:text-white">{{ order.address.full_name }}</p>
+                <p class="mb-1 dark:text-white">{{ order.address.address }}</p>
+                <p class="mb-1 dark:text-white">{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pin_code }}</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <p class="text-red-500">No shipping address found.</p>
+    {% endif %}
+
+    <!-- Order Items Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Order Items</h3>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Offer Price</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Subtotal</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center">
+                                {% with item.product_variant.product as product %}
+                                    {% if item.get_product_image %}
+                                    <div class="flex-shrink-0 h-16 w-16 mr-4 no-print">
+                                        <img src="{{ item.get_product_image }}" alt="{{ product.name }}" class="h-full w-full rounded-md object-cover">
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <p class="font-medium text-gray-800 dark:text-white">{{ product.name }}</p>
+                                        {% if item.product_variant.color %}
+                                        <div class="flex items-center">
+                                            <span class="variant-label text-sm text-gray-500 dark:text-gray-400">Color:</span>
+                                            <div class="w-5 h-5 ml-2 rounded-full border border-gray-300 no-print" 
+                                                 style="background-color: {{ item.product_variant.color }};">
+                                            </div>
+                                            <span class="print-only ml-2">{{ item.product_variant.color }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Size: {{ item.product_variant.size }}</p>
+                                    </div>
+                                {% endwith %}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 line-through">{{ item.price|floatformat:2 }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                            {% if item.offer_price %}
+                                {{ item.offer_price|floatformat:2 }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ item.quantity }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">{{ item.final_price|floatformat:2 }}</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded-full text-sm font-semibold print-only print-status
+                                {% if item.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                {% elif item.status == 'processing' %}bg-blue-100 text-blue-800
+                                {% elif item.status == 'shipped' %}bg-purple-100 text-purple-800
+                                {% elif item.status == 'delivered' %}bg-green-100 text-green-800
+                                {% elif item.status == 'cancelled' %}bg-red-100 text-red-800
+                                {% elif item.status == 'return_requested' %}bg-orange-100 text-orange-800
+                                {% elif item.status == 'return_approved' %}bg-teal-100 text-teal-800
+                                {% elif item.status == 'return_rejected' %}bg-pink-100 text-pink-800
+                                {% elif item.status == 'return_received' %}bg-cyan-100 text-cyan-800
+                                {% elif item.status == 'return_processed' %}bg-lime-100 text-lime-800
+                                {% elif item.status == 'refunded' %}bg-green-100 text-green-800
+                                {% endif %}">
+                                {{ item.get_status_display }}
+                            </span>
+                            <form method="POST" action="{% url 'update_order_item_status' order.order_id item.id %}" class="inline no-print">
+                                {% csrf_token %}
+                                <select name="status" class="px-2 py-1 rounded text-sm font-semibold
+                                    {% if item.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% elif item.status == 'processing' %}bg-blue-100 text-blue-800
+                                    {% elif item.status == 'shipped' %}bg-purple-100 text-purple-800
+                                    {% elif item.status == 'delivered' %}bg-green-100 text-green-800
+                                    {% elif item.status == 'cancelled' %}bg-red-100 text-red-800
+                                    {% elif item.status == 'return_requested' %}bg-orange-100 text-orange-800
+                                    {% elif item.status == 'return_approved' %}bg-teal-100 text-teal-800
+                                    {% elif item.status == 'return_rejected' %}bg-pink-100 text-pink-800
+                                    {% elif item.status == 'return_received' %}bg-cyan-100 text-cyan-800
+                                    {% elif item.status == 'return_processed' %}bg-lime-100 text-lime-800
+                                    {% elif item.status == 'refunded' %}bg-green-100 text-green-800
+                                    {% endif %}"
+                                    onchange="this.form.submit()">
+                                    <option value="pending" {% if item.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="processing" {% if item.status == 'processing' %}selected{% endif %}>Processing</option>
+                                    <option value="shipped" {% if item.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                                    <option value="delivered" {% if item.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                                    <option value="cancelled" {% if item.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    <option value="return_requested" {% if item.status == 'return_requested' %}selected{% endif %}>Return Requested</option>
+                                    <option value="return_approved" {% if item.status == 'return_approved' %}selected{% endif %}>Return Approved</option>
+                                    <option value="return_rejected" {% if item.status == 'return_rejected' %}selected{% endif %}>Return Rejected</option>
+                                    <option value="return_received" {% if item.status == 'return_received' %}selected{% endif %}>Return Received</option>
+                                    <option value="return_processed" {% if item.status == 'return_processed' %}selected{% endif %}>Return Processed</option>
+                                    <option value="refunded" {% if item.status == 'refunded' %}selected{% endif %}>Refunded</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                            No products found in this order.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Subtotal:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">
+                            {{ order.subtotal|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% if order.product_discount > 0 %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Product Discount:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-green-600 dark:text-green-400">
+                            -{{ order.product_discount|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if order.coupon and order.coupon_discount > 0 %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">
+                            Coupon Discount ({{ order.coupon.code }}):
+                        </td>
+                        <td class="px-4 py-3 text-sm font-medium text-green-600 dark:text-green-400">
+                            -{{ order.coupon_discount|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% if order.shipping_cost > 0 %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Shipping Cost:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">
+                            {{ order.shipping_cost|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    <tr class="bg-gray-50 dark:bg-gray-700">
+                        <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-800 dark:text-white">Total:</td>
+                        <td class="px-4 py-3 text-sm font-bold text-gray-800 dark:text-white">
+                            {{ order.total_amount|floatformat:2 }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Order Notes Card -->
+    {% if order.notes or order.admin_notes %}
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Notes</h3>
+        {% if order.notes %}
+        <div class="mb-4">
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Customer Notes</h4>
+            <p class="dark:text-white">{{ order.notes }}</p>
+        </div>
+        {% endif %}
+        {% if order.admin_notes %}
+        <div>
+            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Admin Notes</h4>
+            <p class="dark:text-white">{{ order.admin_notes }}</p>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="flex flex-wrap gap-3 justify-end mt-6 no-print">
+        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200" onclick="printInvoice()">
+            <i class="fas fa-print mr-2"></i>Print
+        </button>
+    </div>
+
+    <!-- Invoice Footer for Print -->
+    <div class="invoice-footer print-only">
+        <p class="text-sm">Thank you for your business!</p>
+        <p class="text-sm">Generated on: {{ "now"|date:"F j, Y" }}</p>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .no-print {
+            display: none !important;
+        }
+        .print-only {
+            display: block !important;
+        }
+        body {
+            background: white;
+            color: black;
+            font-family: 'Arial', sans-serif;
+            margin: 20mm;
+        }
+        .container {
+            width: 100%;
+            max-width: 210mm; /* A4 width */
+            padding: 0;
+            margin: 0 auto;
+        }
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20mm;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10mm;
+        }
+        .invoice-header h1 {
+            font-size: 24pt;
+            margin-bottom: 5mm;
+        }
+        .bg-white, .dark:bg-gray-800 {
+            background: white !important;
+            box-shadow: none !important;
+            border: 1px solid #000;
+            margin-bottom: 10mm;
+            padding: 5mm;
+        }
+        .dark:text-white, .text-gray-800, .text-gray-600 {
+            color: black !important;
+        }
+        .print-status {
+            background: none !important;
+            border: 1px solid #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: black !important;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10mm;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 3mm;
+            font-size: 10pt;
+        }
+        thead th {
+            background: #f0f0f0;
+            font-weight: bold;
+        }
+        tfoot {
+            border-top: 2px solid #000;
+        }
+        .shadow, .rounded-lg {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+        .invoice-footer {
+            text-align: center;
+            border-top: 2px solid #000;
+            padding-top: 10mm;
+            margin-top: 20mm;
+            font-size: 10pt;
+        }
+        h3 {
+            font-size: 14pt;
+            margin-bottom: 5mm;
+        }
+        p {
+            font-size: 10pt;
+            margin-bottom: 2mm;
+        }
+    }
+    .print-only {
+        display: none;
+    }
+    .invoice-header, .invoice-footer {
+        display: none;
+    }
+</style>
+
+<script>
+function printInvoice() {
+    window.print();
+}
+</script>
+{% endblock %}

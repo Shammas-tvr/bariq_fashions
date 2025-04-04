@@ -1,0 +1,270 @@
+{% extends 'home_base.html' %}
+{% block content %}
+<div class="address-container">
+    <div class="address-header">
+        <h1>Edit Address</h1>
+        <div class="breadcrumbs">
+            <a href="{% url 'checkout' %}">Checkout</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Edit Address</span>
+        </div>
+    </div>
+
+    <div class="address-form-container">
+        <div class="address-card">
+            <form method="post" class="address-form">
+                {% csrf_token %}
+                <div class="form-grid">
+                    {% for field in form %}
+                        <div class="form-group {% if field.name == 'address' or field.name == 'address_line2' %}full-width{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="field-help">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% if field.errors %}
+                                <div class="field-error">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-actions">
+                    <div class="make-default-checkbox">
+                        <input type="checkbox" id="make_default" name="make_default">
+                        <label for="make_default">Make this my default address</label>
+                    </div>
+
+                    <div class="button-group">
+                        <a href="{% url 'checkout' %}" class="btn-cancel">
+                            <i class="fas fa-arrow-left"></i> Back to Checkout
+                        </a>
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Address Container */
+    .address-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Address Header */
+    .address-header {
+        margin-bottom: 30px;
+    }
+
+    .address-header h1 {
+        font-size: 28px;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumbs {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        color: #666;
+    }
+
+    .breadcrumbs a {
+        color: #25a19b;
+        text-decoration: none;
+    }
+
+    .breadcrumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumbs i {
+        font-size: 10px;
+        margin: 0 8px;
+        color: #999;
+    }
+
+    /* Address Form Container */
+    .address-form-container {
+        margin-bottom: 40px;
+    }
+
+    .address-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    /* Form Styling */
+    .address-form {
+        width: 100%;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    @media (min-width: 576px) {
+        .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .form-group {
+        margin-bottom: 5px;
+    }
+
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        color: #555;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: border 0.2s;
+    }
+
+    .form-group textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #25a19b;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(37, 161, 155, 0.1);
+    }
+
+    .field-help {
+        font-size: 12px;
+        color: #888;
+        margin-top: 5px;
+    }
+
+    .field-error {
+        color: #ff5252;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .make-default-checkbox {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .make-default-checkbox input {
+        margin-right: 10px;
+    }
+
+    .make-default-checkbox label {
+        font-size: 14px;
+        color: #555;
+        cursor: pointer;
+    }
+
+    .button-group {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    @media (max-width: 576px) {
+        .button-group {
+            flex-direction: column-reverse;
+            width: 100%;
+        }
+
+        .button-group a,
+        .button-group button {
+            width: 100%;
+        }
+    }
+
+    .btn-cancel {
+        padding: 12px 20px;
+        background-color: #f5f5f5;
+        color: #555;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e8e8e8;
+    }
+
+    .btn-cancel i {
+        margin-right: 8px;
+    }
+
+    .btn-save {
+        padding: 12px 20px;
+        background-color: #25a19b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 140px;
+        transition: background-color 0.2s;
+    }
+
+    .btn-save:hover {
+        background-color: #208c85;
+    }
+
+    .btn-save i {
+        margin-right: 8px;
+    }
+</style>
+
+<!-- FontAwesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

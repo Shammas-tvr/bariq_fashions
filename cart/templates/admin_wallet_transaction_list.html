@@ -1,0 +1,85 @@
+{% extends "base_admin.html" %}
+
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-gray-800" style="font-family: 'Roboto', sans-serif;">{{ page_title }}</h2>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-full">
+                <thead class="bg-gray-100 hidden md:table-header-group">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Transaction ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">User</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Type</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Amount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Order</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider" style="font-family: 'Roboto', sans-serif;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for transaction in transactions %}
+                    <tr class="hover:bg-gray-50 transition duration-150 flex flex-col md:table-row mb-6 md:mb-0">
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Transaction ID:</span>
+                            <span class="font-mono" style="font-family: 'Roboto', sans-serif;">{{ transaction.transaction_id }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Date:</span>
+                            <span style="font-family: 'Roboto', sans-serif;">{{ transaction.created_at|date:"M d, Y H:i" }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">User:</span>
+                            <span style="font-family: 'Roboto', sans-serif;">{{ transaction.wallet.user.username }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Type:</span>
+                            <span style="font-family: 'Roboto', sans-serif;">{{ transaction.transaction_type|title }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Amount:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
+                                {% if transaction.amount >= 0 %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}"
+                                style="font-family: 'Roboto', sans-serif;">
+                                {% if transaction.amount >= 0 %}+{% endif %}{{ transaction.amount|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Order:</span>
+                            <span style="font-family: 'Roboto', sans-serif;">
+                                {% if transaction.order %}
+                                    <a href="{% url 'admin_order_detail' transaction.order.order_id %}" 
+                                       class="text-blue-600 hover:text-blue-800">{{ transaction.order.order_id }}</a>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden" style="font-family: 'Roboto', sans-serif;">Actions:</span>
+                            <div class="flex space-x-2">
+                                <a href="{% url 'admin_transaction_detail' transaction.transaction_id %}" 
+                                   class="text-blue-600 hover:text-blue-800 font-medium" 
+                                   style="font-family: 'Roboto', sans-serif;">View Details</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500" style="font-family: 'Roboto', sans-serif;">
+                            No transactions available
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

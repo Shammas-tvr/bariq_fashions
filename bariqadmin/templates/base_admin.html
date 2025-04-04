@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard - Bariq{% endblock %}</title>
+    
+    <!-- Bootstrap CSS (loaded first to allow overrides) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" integrity="sha384-tC78DdvCt3z2vHZVal8zXo4Q0VADxDaHw8ggh8G8A6YF1vYiQ5fLfW+" crossorigin="anonymous">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-200 transition-colors duration-200">
+    <!-- Mobile Navigation Menu Button -->
+    <div class="lg:hidden fixed top-4 left-4 z-30">
+        <button id="mobile-menu-button" class="bg-primary-600 text-white p-2 rounded-lg shadow-lg">
+            <span class="material-icons-round">menu</span>
+        </button>
+    </div>
+
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 lg:relative z-20 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out w-72 bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+            <!-- Top Brand Section -->
+            <div class="p-6 flex items-center border-b border-gray-200 dark:border-gray-700">
+                <div class="bg-gradient-to-r from-primary-600 to-primary-500 p-2 rounded-lg mr-3">
+                    <span class="material-icons-round text-white">bolt</span>
+                </div>
+                <h1 class="text-2xl font-bold text-primary-700 dark:text-primary-400">Bariq Admin</h1>
+                <!-- Mobile Close Button -->
+                <button id="close-sidebar" class="ml-auto lg:hidden text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto py-4 px-3">
+                <ul class="space-y-1">
+                    <li class="px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">
+                        Main
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_dashboard' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">dashboard</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'user_management' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">people</span>
+                            <span>Users</span>
+                        </a>
+                    </li>
+                    
+                    <li class="px-3 py-2 mt-6 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">
+                        E-commerce
+                    </li>
+                    <li>
+                        <a href="{% url 'product_list' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">inventory</span>
+                            <span>Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'order-list' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">shopping_cart</span>
+                            <span>Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admin_transaction_list' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">account_balance_wallet</span>
+                            <span>Wallets</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'category_list' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">category</span>
+                            <span>Categories</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'sales_report' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">bar_chart</span>
+                            <span>Sales Report</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'coupon_list' %}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">local_offer</span>
+                            <span>Coupons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'offers'%}" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">card_giftcard</span>
+                            <span>Offers</span>
+                        </a>
+                    </li>
+                    
+                    <li class="px-3 py-2 mt-6 text-sm font-medium text-gray-500 dark:text-gray-400 uppercase">
+                        Settings
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 hover:bg-primary-50 dark:hover:bg-gray-700 rounded-lg group transition-colors duration-200">
+                            <span class="material-icons-round mr-3 text-gray-500 dark:text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400">settings</span>
+                            <span>System Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Enhanced Top Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm z-10">
+                <div class="flex items-center justify-between p-6">
+                    <div class="flex items-center space-x-6">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-200">{% block header_title %}Dashboard{% endblock %}</h2>
+                        <!-- Breadcrumb -->
+                        <nav class="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                            <a href="#" class="hover:text-primary-600 dark:hover:text-primary-400">Home</a>
+                            <span class="material-icons-round text-xs">chevron_right</span>
+                            <span class="text-gray-800 dark:text-gray-200">{% block breadcrumb_current %}Dashboard{% endblock %}</span>
+                        </nav>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <!-- Search -->
+                        <div class="relative">
+                            <input type="text" placeholder="Search..." class="w-72 pl-10 pr-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <span class="material-icons-round absolute left-3 top-2 text-gray-500 dark:text-gray-400">search</span>
+                        </div>
+                        
+                        <!-- Notifications -->
+                        <button class="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <span class="material-icons-round text-gray-600 dark:text-gray-300">notifications</span>
+                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+                        
+                        <!-- User Menu -->
+                        <div class="relative">
+                            <button id="user-menu-button" class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                                <img src="https://ui-avatars.com/api/?name=Admin+User&background=0284c7&color=fff" alt="Admin User" class="w-8 h-8 rounded-full">
+                                <span class="text-sm font-medium text-gray-800 dark:text-gray-200">Admin User</span>
+                                <span class="material-icons-round text-gray-600 dark:text-gray-300">expand_more</span>
+                            </button>
+                            <!-- Dropdown Menu -->
+                            <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-20">
+                                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                                    <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Admin User</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">administrator</p>
+                                </div>
+                                <div class="p-2">
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Profile</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Settings</a>
+                                    <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg">Logout</a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Dark mode toggle -->
+                        <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                            <span class="material-icons-round text-gray-600 dark:text-gray-300 dark:hidden">dark_mode</span>
+                            <span class="material-icons-round text-gray-600 dark:text-gray-300 hidden dark:block">light_mode</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900">
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (optional, if you need Bootstrap components like modals) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeSidebarButton = document.getElementById('close-sidebar');
+        const sidebar = document.getElementById('sidebar');
+        
+        mobileMenuButton.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+        });
+        
+        closeSidebarButton.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 1024) {
+                if (!sidebar.contains(e.target) && e.target !== mobileMenuButton) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            }
+        });
+
+        // Dark mode toggle
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            localStorage.setItem('darkMode', isDarkMode);
+        });
+        
+        // Check local storage for dark mode preference
+        const darkMode = localStorage.getItem('darkMode');
+        if (darkMode === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+
+        // User menu dropdown toggle
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenuDropdown = document.getElementById('user-menu-dropdown');
+        
+        userMenuButton.addEventListener('click', () => {
+            userMenuDropdown.classList.toggle('hidden');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userMenuButton.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+                userMenuDropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

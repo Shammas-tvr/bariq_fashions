@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Bariq Men's Fashions</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Top bar styles */
+        .top-bar {
+            background: #f6f6f6;
+            padding: 10px 0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        .top-bar-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .contact-info {
+            display: flex;
+            gap: 25px;
+        }
+
+        .contact-info span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .top-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .top-links a:hover {
+            color: #25a19b;
+        }
+
+        /* Main header styles */
+        .main-header {
+            padding: 25px 0;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .logo img {
+            height: 45px;
+            display: block;
+        }
+
+        /* Navigation styles */
+        .nav-menu {
+            display: flex;
+            gap: 35px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu a {
+            color: #222;
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu a:hover {
+            color: #25a19b;
+        }
+
+        /* Header icons */
+        .header-icons {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+            position: relative;
+        }
+
+        .icon-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            color: #222;
+            transition: color 0.3s ease;
+        }
+
+        .icon-link:hover {
+            color: #25a19b;
+        }
+
+        .icon-link svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Search styles */
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-overlay {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            background: white;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 6px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .search-overlay.active {
+            display: block;
+        }
+
+        .search-container {
+            width: 100%;
+            position: relative;
+            padding: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            font-size: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f8f8;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: #25a19b;
+            background: white;
+        }
+
+        .close-search {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #555;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .close-search:hover {
+            color: #25a19b;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #222;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Search results */
+        .search-results {
+            display: none;
+            padding: 5px 0;
+            background: white;
+            width: 100%;
+        }
+
+        .search-results.loading::after {
+            content: "Loading...";
+            display: block;
+            padding: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .search-results ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .search-results li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s ease;
+        }
+
+        .search-results li:last-child {
+            border-bottom: none;
+        }
+
+        .search-results li:hover {
+            background: #f5f5f5;
+        }
+
+        .search-results li a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .search-results li a img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+
+        .search-results li a .result-text {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .search-results li a .result-text span {
+            display: block;
+            font-size: 15px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+
+        .search-results li a .result-text small {
+            display: block;
+            font-size: 13px;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        /* Footer styles */
+        .footer {
+            background: #222;
+            color: #f6f6f6;
+            padding: 25px 0 10px;
+            margin-top: 20px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .footer-column h3 {
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 30px;
+            height: 2px;
+            background: #25a19b;
+        }
+
+        .footer-column p {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 6px;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            font-size: 13px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #25a19b;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .social-icon {
+            width: 30px;
+            height: 30px;
+            background: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: #25a19b;
+        }
+
+        .social-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: white;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .footer-contact li {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #aaa;
+        }
+
+        .footer-contact svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: #25a19b;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .newsletter-form {
+            margin-top: 10px;
+        }
+
+        .newsletter-input {
+            width: 100%;
+            padding: 6px 12px;
+            background: #333;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 6px;
+            outline: none;
+        }
+
+        .newsletter-input::placeholder {
+            color: #aaa;
+        }
+
+        .newsletter-input:focus {
+            background: #444;
+        }
+
+        .btn-subscribe {
+            padding: 6px 15px;
+            background: #25a19b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-subscribe:hover {
+            background: #1d817c;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            margin-top: 20px;
+            padding-top: 10px;
+        }
+
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .payment-icon {
+            display: block;
+            background: #fff;
+            border-radius: 4px;
+            padding: 4px;
+            width: 35px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Messages */
+        .messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .alert-warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .messages {
+            animation: fadeOut 0.3s ease-out 3s forwards;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .nav-menu {
+                gap: 25px;
+            }
+            
+            .nav-menu a {
+                font-size: 13px;
+            }
+
+            .header-icons {
+                gap: 20px;
+            }
+            
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-bar {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+                order: 1;
+            }
+
+            .logo {
+                order: 2;
+            }
+
+            .header-icons {
+                order: 3;
+                gap: 15px;
+            }
+
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+                z-index: 1000;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .icon-link svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            .search-overlay {
+                width: 280px;
+                right: 0;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .footer-bottom-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .copyright {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-icons {
+                gap: 12px;
+            }
+
+            .icon-link svg {
+                width: 18px;
+                height: 18px;
+            }
+            
+            .search-overlay {
+                width: 240px;
+                right: 0;
+            }
+            
+            .search-results li a .result-text span {
+                max-width: 160px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top bar -->
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <div class="contact-info">
+                <span>PHONE: +91 8078528460</span>
+                <span>EMAIL: bariqmensfashions@gmail.com</span>
+            </div>
+            <div class="top-links">
+                <a href="#">TRACK ORDER</a>
+                <a href="#">CONTACT US</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main header -->
+    <header class="main-header">
+        <div class="header-content">
+            <div class="logo">
+                <a href="#"> 
+                    <img src="{% static 'images/bariq_logo.png' %}" alt="bariq_logo">
+                </a>
+            </div>
+
+            <button class="mobile-menu-btn" aria-label="Toggle menu">☰</button>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="{% url 'homepage'%}">HOME</a></li>
+                    <li><a href="{% url 'shop_page' %}">SHOP</a></li>
+                    <li><a href="#">BLOG</a></li>
+                    <li><a href="#">PAGES</a></li>
+                    <li><a href="#">CONTACT</a></li>
+                </ul>
+            </nav>
+
+            <div class="header-icons">
+                <div class="search-wrapper">
+                    <a href="#" class="icon-link search-trigger" aria-label="Search">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </a>
+                    <div class="search-overlay">
+                        <div class="search-container">
+                            <input type="text" class="search-input" id="search-box" placeholder="Search products...">
+                            <button class="close-search" aria-label="Close search">×</button>
+                        </div>
+                        <div class="search-results" id="search-results"></div>
+                    </div>
+                </div>
+                
+                <a href="{% url 'cart_view' %}" class="icon-link" aria-label="Shopping cart">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"/>
+                        <rect x="4" y="7" width="16" height="14" rx="2"/>
+                        <path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span class="cart-count">{{ cart.items.count }}</span>
+                </a>
+                
+                <a href="{% url 'user_profile'%}" class="icon-link" aria-label="User account">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>About Us</h3>
+                <p>Bariq Men's Fashions offers premium quality clothing for the modern man. We believe in style, comfort and elegance.</p>
+                <div class="social-links">
+                    <a href="#" class="social-icon" aria-label="Facebook">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-icon" aria-label="Twitter">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-icon" aria-label="Instagram">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-icon" aria-label="Pinterest">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 2a10 10 0 0 0-3.16 19.5c-.07-.7-.12-1.81.03-2.57.14-.64.9-4.05.9-4.05s-.23-.46-.23-1.15c0-1.08.62-1.88 1.4-1.88.66 0 .98.5.98 1.1 0 .66-.42 1.67-.64 2.6-.18.78.39 1.42 1.15 1.42 1.38 0 2.45-1.47 2.45-3.57 0-1.87-1.34-3.18-3.25-3.18-2.2 0-3.5 1.66-3.5 3.37 0 .67.26 1.38.58 1.76.06.08.07.15.05.22-.06.25-.19.8-.21.9-.03.14-.12.17-.26.1-.97-.4-1.58-1.68-1.58-2.7 0-2.2 1.6-4.23 4.6-4.23 2.4 0 4.28 1.72 4.28 4.03 0 2.4-1.5 4.33-3.58 4.33-.7 0-1.35-.36-1.58-.79l-.43 1.63c-.16.6-.57 1.36-.84 1.82 1.03.32 2.15.5 3.32.5 6.16 0 11-5.37 11-12S17.62 0 11.46 0A11 11 0 0 0 0 12c0 6.63 5.37 12 12 12z"></path>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Shop</a></li>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>My Account</h3>
+                <ul class="footer-links">
+                    <li><a href="#">My Account</a></li>
+                    <li><a href="#">Order History</a></li>
+                    <li><a href="#">Wishlist</a></li>
+                    <li><a href="#">Track Order</a></li>
+                    <li><a href="#">Returns & Exchanges</a></li>
+                    <li><a href="#">Shipping Policy</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Stay Connected</h3>
+                <ul class="footer-contact footer-links">
+                    <li>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>123 Fashion Street, Mumbai, India</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <span>bariqmensfashions@gmail.com</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        <span>+91 8078528460</span>
+                    </li>
+                </ul>
+                <div class="newsletter-form">
+                    <h4 style="color: #fff; margin-bottom: 10px; font-size: 15px;">Subscribe to our newsletter</h4>
+                    <input type="email" class="newsletter-input" placeholder="Your email address">
+                    <button class="btn-subscribe">Subscribe</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="copyright">
+                    © 2025 Bariq Men's Fashions. All rights reserved.
+                </div>
+                <div class="payment-methods">
+                    <span class="payment-icon">
+                        <img src="{% static 'images/visa.png' %}" alt="Visa" width="30" height="18">
+                    </span>
+                    <span class="payment-icon">
+                        <img src="{% static 'images/mastercard.png' %}" alt="Mastercard" width="30" height="18">
+                    </span>
+                    <span class="payment-icon">
+                        <img src="{% static 'images/paypal.png' %}" alt="PayPal" width="30" height="18">
+                    </span>
+                    <span class="payment-icon">
+                        <img src="{% static 'images/gpay.png' %}" alt="Google Pay" width="30" height="18">
+                    </span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelector('.messages');
+            if (messages) {
+                setTimeout(() => {
+                    messages.remove();
+                }, 3500);
+            }
+        });
+        
+        // Mobile menu
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navMenu = document.querySelector('.nav-menu');
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // Search functionality
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchTrigger = document.querySelector('.search-trigger');
+            const searchOverlay = document.querySelector('.search-overlay');
+            const closeSearch = document.querySelector('.close-search');
+            const searchInput = document.getElementById("search-box");
+            const searchResults = document.getElementById("search-results");
+
+            // Toggle search overlay
+            searchTrigger.addEventListener('click', (e) => {
+                e.preventDefault();
+                searchOverlay.classList.toggle('active');
+                if (searchOverlay.classList.contains('active')) {
+                    setTimeout(() => searchInput.focus(), 100);
+                }
+            });
+
+            // Close search
+            closeSearch.addEventListener('click', () => {
+                searchOverlay.classList.remove('active');
+                searchInput.value = '';
+                searchResults.style.display = 'none';
+            });
+
+            // Close on escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && searchOverlay.classList.contains('active')) {
+                    searchOverlay.classList.remove('active');
+                    searchInput.value = '';
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!searchOverlay.contains(e.target) && !searchTrigger.contains(e.target)) {
+                    searchOverlay.classList.remove('active');
+                    searchResults.style.display = 'none';
+                }
+            });
+
+            // Search input handling with condition
+            let timeoutId;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(timeoutId);
+                const query = this.value.trim();
+
+                if (query.length >= 2) {  // Condition: only search with 2+ characters
+                    timeoutId = setTimeout(() => {
+                        // Show loading state
+                        searchResults.classList.add('loading');
+                        searchResults.style.display = 'block';
+                        searchResults.innerHTML = '';
+
+                        fetch(`/ajax-search/?q=${encodeURIComponent(query)}`, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            searchResults.classList.remove('loading');
+                            searchResults.innerHTML = "";
+                            
+                            if (data.results && data.results.length > 0) {
+                                let resultHTML = "<ul>";
+                                data.results.forEach(product => {
+                                    resultHTML += `
+                                        <li>
+                                            <a href="/product_detail/${product.id}/">
+                                                <img src="${product.image_url}" alt="${product.name}">
+                                                <div class="result-text">
+                                                    <span>${product.name}</span>
+                                                    ${product.category ? `<small>${product.category}</small>` : ''}
+                                                </div>
+                                            </a>
+                                        </li>
+                                    `;
+                                });
+                                resultHTML += "</ul>";
+                                searchResults.innerHTML = resultHTML;
+                                searchResults.style.display = "block";
+                            } else {
+                                searchResults.innerHTML = "<ul><li>No results found</li></ul>";
+                                searchResults.style.display = "block";
+                            }
+                        })
+                        .catch(error => {
+                            searchResults.classList.remove('loading');
+                            console.error('Error fetching search results:', error);
+                            searchResults.innerHTML = "<ul><li>Unable to load results</li></ul>";
+                            searchResults.style.display = "block";
+                        });
+                    }, 300); // Debounce delay
+                } else {
+                    searchResults.innerHTML = "";
+                    searchResults.style.display = "none";
+                }
+            });
+
+            // Submit search on Enter
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && searchInput.value.trim() !== '') {
+                    window.location.href = `/search?q=${encodeURIComponent(searchInput.value)}`;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

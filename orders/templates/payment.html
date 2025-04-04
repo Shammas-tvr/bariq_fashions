@@ -1,0 +1,789 @@
+{% extends "home_base.html" %}
+{% load static %}
+
+{% block content %}
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<style>
+    /* [Previous CSS remains unchanged] */
+    /* Keeping all your existing styles as they are since they look good */
+    /* Payment Page Container */
+    .payment-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Checkout Header */
+    .checkout-header {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .checkout-header h1 {
+        font-size: 28px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    /* Checkout Steps */
+    .checkout-steps {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: 120px;
+    }
+
+    .step:not(:last-child):after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        right: -60px;
+        width: 120px;
+        height: 2px;
+        background-color: #e0e0e0;
+    }
+
+    .step.active:not(:last-child):after {
+        background-color: #25a19b;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-bottom: 8px;
+    }
+
+    .step.active .step-number {
+        background-color: #25a19b;
+        color: white;
+    }
+
+    .step-label {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .step.active .step-label {
+        color: #25a19b;
+        font-weight: bold;
+    }
+
+    /* Payment Content */
+    .payment-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    @media (min-width: 768px) {
+        .payment-content {
+            grid-template-columns: 3fr 2fr;
+        }
+    }
+
+    /* Payment Sections */
+    .payment-section, .order-summary {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+        margin: 0;
+        color: #333;
+    }
+
+    /* Payment Method Options */
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .payment-method-card {
+        border: 1px solid #eee;
+        border-radius: 6px;
+        padding: 18px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .payment-method-card:hover {
+        border-color: #25a19b;
+        box-shadow: 0 2px 8px rgba(37, 161, 155, 0.1);
+    }
+
+    .payment-method-card.selected {
+        border-color: #25a19b;
+        background-color: rgba(37, 161, 155, 0.05);
+    }
+
+    .payment-method-icon {
+        width: 40px;
+        height: 40px;
+        margin-right: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #25a19b;
+    }
+
+    .payment-method-details {
+        flex: 1;
+    }
+
+    .payment-method-name {
+        font-weight: 600;
+        font-size: 16px;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .payment-method-description {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .payment-method-status {
+        font-size: 12px;
+        padding: 3px 8px;
+        border-radius: 20px;
+        margin-left: 10px;
+    }
+
+    .status-available {
+        background-color: #e8f5e9;
+        color: #4caf50;
+    }
+
+    .status-unavailable {
+        background-color: #f5f5f5;
+        color: #999;
+    }
+
+    /* Order Summary */
+    .order-summary {
+        position: sticky;
+        top: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .order-summary h2 {
+        margin-bottom: 15px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #eee;
+        font-size: 22px;
+        color: #333;
+    }
+
+    .cart-items {
+        max-height: 350px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        padding-right: 5px;
+    }
+
+    .cart-items::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .cart-items::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 10px;
+    }
+
+    .cart-items::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 10px;
+    }
+
+    .cart-item {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .cart-item:last-child {
+        border-bottom: none;
+    }
+
+    .item-image {
+        width: 70px;
+        height: 70px;
+        margin-right: 15px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .item-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .item-name {
+        font-weight: 600;
+        margin-bottom: 6px;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .item-quantity {
+        font-size: 13px;
+        color: #666;
+        background-color: #f5f7f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .item-price {
+        text-align: right;
+        min-width: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .original-price {
+        display: block;
+        text-decoration: line-through;
+        color: #999;
+        font-size: 13px;
+    }
+
+    .discount-price,
+    .final-price {
+        color: #333;
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .discount-price {
+        color: #e53935;
+    }
+
+    /* Price Summary */
+    .price-summary {
+        margin-top: 20px;
+        padding: 18px;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        border: 1px solid #eee;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        font-size: 15px;
+    }
+
+    .price-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .price-value {
+        font-weight: 500;
+    }
+
+    .price-row.discount {
+        color: #4caf50;
+    }
+
+    .price-row.discount .price-value {
+        font-weight: 600;
+    }
+
+    .price-row.shipping .price-value {
+        color: #4caf50;
+        font-weight: 600;
+    }
+
+    .price-row.total {
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #ddd;
+    }
+
+    .price-row.total .price-value {
+        font-size: 20px;
+        color: #333;
+    }
+
+    /* Complete Payment Button */
+    .btn-place-order {
+        width: 100%;
+        padding: 16px;
+        background-color: #25a19b;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: background-color 0.2s, transform 0.1s;
+        box-shadow: 0 3px 6px rgba(37, 161, 155, 0.2);
+    }
+
+    .btn-place-order:hover {
+        background-color: #208c85;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(37, 161, 155, 0.3);
+    }
+
+    .btn-place-order:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 4px rgba(37, 161, 155, 0.2);
+    }
+
+    .btn-place-order i {
+        margin-left: 10px;
+    }
+
+    .secure-checkout {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 13px;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .secure-checkout i {
+        margin-right: 5px;
+        color: #4caf50;
+    }
+    .payment-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 767px) {
+        .checkout-steps {
+            display: none;
+        }
+
+        .payment-right {
+            order: -1;
+            margin-bottom: 20px;
+        }
+
+        .item-price {
+            min-width: 80px;
+        }
+    }
+</style>
+
+<div class="payment-container">
+    <div class="checkout-header">
+        <h1>Choose Payment Method</h1>
+        <div class="checkout-steps">
+            <div class="step">
+                <span class="step-number">1</span>
+                <span class="step-label">Shipping</span>
+            </div>
+            <div class="step active">
+                <span class="step-number">2</span>
+                <span class="step-label">Payment</span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="payment-content">
+        <!-- Left Column: Payment Methods -->
+        <div class="payment-left">
+            <div class="payment-section">
+                <div class="section-header">
+                    <h2>Select Payment Method</h2>
+                </div>
+                <div class="payment-methods">
+                    <div class="payment-method-card {% if payment_method == 'cod' %}selected{% else %}selected{% endif %}" data-method="cod">
+                        <div class="payment-method-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="payment-method-details">
+                            <div class="payment-method-name">
+                                Cash on Delivery
+                                <span class="payment-method-status status-available">Available</span>
+                            </div>
+                            <div class="payment-method-description">Pay with cash when your order is delivered</div>
+                        </div>
+                    </div>
+                    <div class="payment-method-card {% if payment_method == 'razorpay' %}selected{% endif %}" data-method="razorpay">
+                        <div class="payment-method-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="payment-method-details">
+                            <div class="payment-method-name">
+                                Pay with Razorpay
+                                <span class="payment-method-status status-available">Available</span>
+                            </div>
+                            <div class="payment-method-description">Pay securely with credit/debit card or UPI</div>
+                        </div>
+                    </div>
+                    <div class="payment-method-card" data-method="paypal">
+                        <div class="payment-method-icon">
+                            <i class="fab fa-paypal"></i>
+                        </div>
+                        <div class="payment-method-details">
+                            <div class="payment-method-name">
+                                Pay with PayPal
+                                <span class="payment-method-status status-unavailable">Unavailable</span>
+                            </div>
+                            <div class="payment-method-description">Pay securely with your PayPal account</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Order Summary -->
+        <div class="payment-right">
+            <div class="checkout-section order-summary">
+                <h2>Order Summary</h2>
+                <div class="cart-items">
+                    {% for item in cart_items %}
+                        <div class="cart-item">
+                            <div class="item-image">
+                                {% if item.product_variant.images.first %}
+                                    <img src="{{ item.product_variant.images.first.image.url }}" alt="{{ item.product_variant.product.name }}">
+                                {% else %}
+                                    <img src="{% static 'images/default-product-image.jpg' %}" alt="No image available">
+                                {% endif %}
+                            </div>
+                            <div class="item-details">
+                                <div class="item-name">{{ item.product_variant.product.name }}</div>
+                                <div class="item-quantity">Qty: {{ item.quantity }}</div>
+                            </div>
+                            <div class="item-price">
+                                {% if item.product_variant.product.offer_price %}
+                                    <span class="original-price">₹{{ item.product_variant.product.price|floatformat:2 }}</span>
+                                    <span class="discount-price">₹{{ item.product_variant.product.offer_price|floatformat:2 }}</span>
+                                {% else %}
+                                    <span class="final-price">₹{{ item.product_variant.product.price|floatformat:2 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="price-summary">
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span class="price-value">₹{{ total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="price-row discount">
+                        <span>Product Discount</span>
+                        <span class="price-value">-₹{{ product_discount|floatformat:2 }}</span>
+                    </div>
+                    {% if coupon_discount > 0 %}
+                        <div class="price-row discount">
+                            <span>Coupon Discount {% if applied_coupon %}({{ applied_coupon }}){% endif %}</span>
+                            <span class="price-value">-₹{{ coupon_discount|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
+                    <div class="price-row shipping">
+                        <span>Shipping</span>
+                        <span class="price-value">
+                            {% if shipping_cost == 0 %}
+                                Free
+                            {% else %}
+                                ₹{{ shipping_cost|floatformat:2 }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total</span>
+                        <span class="price-value">₹{{ final_price|floatformat:2 }}</span>
+                    </div>
+                </div>
+                <button id="completePaymentBtn" type="button" class="btn-place-order" data-url="{% url 'process_payment' %}">
+                    Complete Payment <i class="fas fa-lock"></i>
+                </button>
+                <div class="secure-checkout">
+                    <i class="fas fa-shield-alt"></i> Secure Checkout
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const paymentMethods = document.querySelectorAll('.payment-method-card');
+    let selectedMethod = '{% if payment_method %}{{ payment_method|escapejs }}{% else %}cod{% endif %}';
+    const completePaymentBtn = document.getElementById('completePaymentBtn');
+
+    if (!completePaymentBtn) {
+        console.error('Complete Payment button not found!');
+        alert('Error: Payment button not found on the page.');
+        return;
+    }
+
+    paymentMethods.forEach(method => {
+        method.addEventListener('click', function () {
+            const methodName = this.getAttribute('data-method');
+            if (methodName === 'paypal') {
+                alert('PayPal is not available right now.');
+                return;
+            }
+            paymentMethods.forEach(m => m.classList.remove('selected'));
+            this.classList.add('selected');
+            selectedMethod = methodName;
+            console.log('Payment method selected:', selectedMethod);
+        });
+    });
+
+    completePaymentBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+        console.log('Complete Payment button clicked. Selected method:', selectedMethod);
+
+        if (!selectedMethod) {
+            alert('Please select a payment method.');
+            return;
+        }
+
+        completePaymentBtn.disabled = true; // Prevent multiple clicks
+        completePaymentBtn.textContent = 'Processing...';
+
+        if (selectedMethod === 'razorpay') {
+            initiateRazorpayPayment();
+        } else if (selectedMethod === 'cod') {
+            processPayment(selectedMethod);
+        } else {
+            alert('Unsupported payment method: ' + selectedMethod);
+            resetButton();
+        }
+    });
+
+    function getCSRFToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring('csrftoken='.length));
+                    break;
+                }
+            }
+        }
+        console.log('CSRF Token:', cookieValue);
+        return cookieValue;
+    }
+
+    function resetButton() {
+        completePaymentBtn.disabled = false;
+        completePaymentBtn.textContent = 'Complete Payment';
+    }
+
+    function processPayment(method) {
+        const processPaymentUrl = completePaymentBtn.getAttribute('data-url');
+        const csrfToken = getCSRFToken();
+
+        if (!csrfToken) {
+            alert('Error: CSRF token not available.');
+            resetButton();
+            return;
+        }
+
+        fetch(processPaymentUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'payment_method': method })
+        })
+        .then(response => response.json().then(data => ({ status: response.status, data })))
+        .then(({ status, data }) => {
+            if (status === 200 && data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Payment failed: ' + (data.error || 'Unknown error'));
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Fetch Error:', error);
+            alert('Error processing payment: ' + error.message);
+            resetButton();
+        });
+    }
+
+    function initiateRazorpayPayment() {
+        const processPaymentUrl = completePaymentBtn.getAttribute('data-url');
+        const csrfToken = getCSRFToken();
+
+        if (!csrfToken) {
+            alert('Error: CSRF token not available.');
+            resetButton();
+            return;
+        }
+
+        fetch(processPaymentUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'payment_method': 'razorpay' })
+        })
+        .then(response => response.json().then(data => ({ status: response.status, data })))
+        .then(({ status, data }) => {
+            if (status === 200 && data.success) {
+                const options = {
+                    'key': data.key,
+                    'amount': data.amount,
+                    'currency': data.currency,
+                    'name': 'Bariq Men\'s Fashion',
+                    'description': 'Order Payment',
+                    'order_id': data.razorpay_order_id,
+                    'handler': function (response) {
+                        console.log('Payment Success:', response);
+                        verifyPayment(response);
+                    },
+                    'prefill': {
+                        'name': '{{ request.user.username|escapejs }}',
+                        'email': '{{ request.user.email|escapejs }}',
+                        'contact': '{{ request.user.phone|default:""|escapejs }}'
+                    },
+                    'theme': {
+                        'color': '#25a19b'
+                    },
+                    'modal': {
+                        'ondismiss': function () {
+                            console.log('Razorpay modal dismissed');
+                            resetButton();
+                        }
+                    }
+                };
+
+                try {
+                    if (typeof Razorpay === 'undefined') {
+                        throw new Error('Razorpay script not loaded');
+                    }
+                    const rzp1 = new Razorpay(options);
+                    rzp1.on('payment.failed', function (response) {
+                        console.error('Payment Failed:', response.error);
+                        alert('Payment Failed: ' + response.error.description);
+                        resetButton();
+                    });
+                    console.log('Opening Razorpay modal with options:', options);
+                    rzp1.open();
+                } catch (error) {
+                    console.error('Razorpay Initialization Error:', error);
+                    alert('Error initializing payment: ' + error.message);
+                    resetButton();
+                }
+            } else {
+                alert('Razorpay initiation failed: ' + (data.error || 'Unknown error'));
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Razorpay Fetch Error:', error);
+            alert('Error initiating payment: ' + error.message);
+            resetButton();
+        });
+    }
+
+    function verifyPayment(response) {
+        const csrfToken = getCSRFToken();
+
+        if (!csrfToken) {
+            alert('Error: CSRF token not available.');
+            resetButton();
+            return;
+        }
+
+        fetch('{% url "verify_payment" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'razorpay_payment_id': response.razorpay_payment_id,
+                'razorpay_order_id': response.razorpay_order_id,
+                'razorpay_signature': response.razorpay_signature
+            })
+        })
+        .then(response => response.json().then(data => ({ status: response.status, data })))
+        .then(({ status, data }) => {
+            if (status === 200 && data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                alert('Payment verification failed: ' + (data.error || 'Unknown error'));
+                resetButton();
+            }
+        })
+        .catch(error => {
+            console.error('Verification Fetch Error:', error);
+            alert('Payment verification error: ' + error.message);
+            resetButton();
+        });
+    }
+});
+</script>
+{% endblock %}

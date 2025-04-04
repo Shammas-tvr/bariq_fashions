@@ -1,0 +1,706 @@
+{% extends 'user_dashboard.html' %}
+
+{% block user_content %}
+<style>
+    /* Scoped styles to prevent inheritance issues */
+    .order-details-container {
+        --primary-color: #25a19b;
+        --primary-dark: #1d817c;
+        --light-bg: #f8f9fa;
+        --danger-color: #dc3545;
+        --danger-dark: #c82333;
+    }
+    
+    .order-details-container body {
+        background: var(--light-bg);
+        min-height: 100vh;
+    }
+    
+    .order-details-container .container {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .order-details-container .order-item {
+        transition: all 0.3s ease;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .order-details-container .order-item:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.1);
+        border-color: var(--primary-color);
+    }
+
+    .order-details-container .product-img-container {
+        min-height: 120px;
+        background-color: #fcfcfc;
+        border-radius: 4px;
+    }
+    
+    .order-details-container .card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        border: none;
+    }
+    
+    .order-details-container .card-header {
+        border-bottom: 0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .order-details-container .text-primary {
+        color: var(--primary-color) !important;
+    }
+    
+    .order-details-container .btn-primary, 
+    .order-details-container .bg-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+    
+    .order-details-container .btn-outline-primary {
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+    
+    .order-details-container .btn-outline-primary:hover {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+    }
+    
+    .order-details-container a:not(.btn) {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    
+    .order-details-container a:not(.btn):hover {
+        color: var(--primary-dark);
+    }
+    
+    .order-details-container .form-check-input:checked {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+    
+    .order-details-container .form-control:focus, 
+    .order-details-container .form-select:focus {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.25rem rgba(37, 161, 155, 0.25) !important;
+    }
+    
+    .order-details-container .badge {
+        font-size: 0.875rem;
+        padding: 0.35em 0.65em;
+        border-radius: 6px;
+    }
+    
+    .order-details-container .btn {
+        transition: all 0.3s ease;
+        border-radius: 6px;
+    }
+    
+    .order-details-container .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .order-details-container .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        background: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        transform: translateY(-100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 9999;
+        max-width: 350px;
+    }
+    
+    .order-details-container .notification.show {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    
+    .order-details-container .notification.success {
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .order-details-container .notification.error {
+        border-left: 4px solid var(--danger-color);
+    }
+    
+    .order-details-container .notification-icon {
+        margin-right: 15px;
+        font-size: 20px;
+    }
+    
+    .order-details-container .notification.success .notification-icon {
+        color: var(--primary-color);
+    }
+    
+    .order-details-container .notification.error .notification-icon {
+        color: var(--danger-color);
+    }
+    
+    .order-details-container .notification-message {
+        font-weight: 500;
+    }
+    
+    @media (max-width: 576px) {
+        .order-details-container .product-img-container { min-height: 80px; }
+        .order-details-container .h5 { font-size: 1rem; }
+        .order-details-container .small { font-size: 0.75rem; }
+        .order-details-container .card-body { padding: 0.75rem; }
+        .order-details-container .badge { font-size: 0.75rem; }
+        .order-details-container .color-swatch { width: 14px !important; height: 14px !important; }
+        .order-details-container .notification { left: 20px; right: 20px; max-width: none; }
+    }
+
+    .order-details-container .hover-shadow { 
+        transition: all 0.3s ease; 
+    }
+    
+    .order-details-container .hover-shadow:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .order-details-container .card { 
+        border-radius: 15px; 
+    }
+    
+    .order-details-container .btn { 
+        border-radius: 8px; 
+        font-weight: 600; 
+        padding: 10px 20px; 
+    }
+    
+    .order-details-container .badge { 
+        font-weight: 500; 
+        letter-spacing: 0.5px; 
+    }
+    
+    .order-details-container .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    .order-details-container .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+    }
+    
+    @keyframes ripple {
+        to { transform: scale(4); opacity: 0; }
+    }
+    
+    .order-details-container .cancel-btn {
+        background: var(--danger-color);
+        color: white;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        border: none;
+    }
+
+    .order-details-container .cancel-btn:hover {
+        background: var(--danger-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .order-details-container .return-btn {
+        background: #ffffff;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .order-details-container .return-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 161, 155, 0.3);
+    }
+
+    .order-details-container .order-cancel-btn {
+        background: var(--danger-color);
+        color: white;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        border: none;
+        margin-left: 10px;
+    }
+
+    .order-details-container .order-cancel-btn:hover {
+        background: var(--danger-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        color: white;
+    }
+
+    .order-details-container .order-return-btn {
+        background: #ffffff;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        transition: all 0.3s ease;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .order-details-container .order-return-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 161, 155, 0.3);
+    }
+
+    .order-details-container .product-card { 
+        transition: all 0.3s ease; 
+    }
+
+    .order-details-container .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+    .order-details-container .product-image {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .order-details-container .product-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .order-details-container .price-old {
+        text-decoration: line-through;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .order-details-container .color-swatch {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid #ddd;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .order-details-container .color-display {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+        .order-details-container .product-card .card-body { padding: 0.75rem; }
+        .order-details-container .product-title { font-size: 1rem; }
+        .order-details-container .product-image { max-height: 100px; }
+        .order-details-container .color-swatch { width: 16px !important; height: 16px !important; }
+        .order-details-container .h5 { font-size: 1rem; }
+        .order-details-container .cancel-btn { font-size: 1rem; padding: 0.5rem 1rem; }
+        .order-details-container .return-btn { font-size: 1rem; padding: 0.5rem 1rem; }
+        .order-details-container .order-cancel-btn { font-size: 1rem; padding: 0.5rem 1rem; }
+        .order-details-container .order-return-btn { font-size: 1rem; padding: 0.5rem 1rem; }
+    }
+
+    @media (max-width: 576px) {
+        .order-details-container .product-card .row { flex-direction: column; }
+        .order-details-container .product-card .col-4 { width: 100%; max-width: 150px; margin: 0 auto; }
+        .order-details-container .product-card .col-8 { width: 100%; text-align: center; }
+        .order-details-container .text-sm-end { text-align: center !important; }
+        .order-details-container .d-flex.justify-content-between { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+</style>
+<div class="container mt-4 order-details-container">
+    <div class="card shadow-lg border-0 mb-4">
+        <div class="card-header text-white position-relative py-4 bg-primary">
+            <h2 class="mb-0 d-flex align-items-center justify-content-between">
+                <span>
+                    <i class="bi bi-bag-check me-2"></i>Order Details
+                </span>
+                <div class="d-flex gap-2">
+                    {% if order.status|lower == 'pending' or order.status|lower == 'processing' %}
+                    <button onclick="cancelOrder('{{ order.order_id }}')" 
+                            class="btn order-cancel-btn">
+                        <i class="bi bi-x-circle me-2"></i>Cancel Order
+                    </button>
+                    {% elif order.status|lower == 'delivered' %}
+                    <a href="{% url 'request_order_return' order_id=order.order_id item_id=0 %}" 
+                       class="btn order-return-btn">
+                        <i class="bi bi-arrow-counterclockwise me-2"></i>Return Order
+                    </a>
+                    {% endif %}
+                    <button onclick="printInvoice()" class="btn btn-light">
+                        <i class="bi bi-printer me-2"></i>Print Invoice
+                    </button>
+                </div>
+            </h2>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="mb-4 text-primary"><i class="bi bi-info-circle me-2"></i>Order Information</h4>
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Order ID</span>
+                                <span class="text-dark">{{ order.order_id }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Order Date</span>
+                                <span class="text-dark">{{ order.order_date }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Payment Method</span>
+                                <span class="badge bg-success">{{ order.payment_method }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Subtotal</span>
+                                <span class="text-dark">₹{{ order.subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Shipping Cost</span>
+                                <span class="text-dark">₹{{ order.shipping_cost }}</span>
+                            </div>
+                            {% if order.coupon %}
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Coupon Discount</span>
+                                <span class="text-dark">₹{{ order.coupon_discount }}</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex justify-content-between border-bottom py-3">
+                                <span class="fw-bold text-muted">Product Discount</span>
+                                <span class="text-dark">₹{{ order.product_discount }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-3">
+                                <span class="fw-bold text-muted">Total Amount</span>
+                                <span class="text-dark h5">₹{{ order.total_amount }}</span>
+                            </div>
+                            {% if order.status != 'Cancelled' and order.status != 'Processing' %}
+                            <div class="mt-3">
+                                <a href="{% url 'track_order' order.order_id %}" 
+                                   class="btn btn-primary w-100 py-3 mb-2">
+                                    <i class="bi bi-truck me-2"></i>Track Shipment
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h4 class="mb-4 text-primary">
+                                <i class="bi bi-geo-alt me-2"></i>Shipping Address
+                            </h4>
+                            <div class="address-details">
+                                <h5 class="fw-bold mb-3">{{ order.address.full_name }}</h5>
+                                <p class="mb-2 text-muted">
+                                    <i class="bi bi-house me-2"></i>{{ order.address.address}}
+                                </p>
+                                <p class="mb-2 text-muted">
+                                    <i class="bi bi-geo me-2"></i>{{ order.address.city }}, 
+                                    {{ order.address.state }} {{ order.address.pincode }}
+                                </p>
+                                <p class="mb-0 text-muted">
+                                    <i class="bi bi-telephone me-2"></i>{{ order.address.phone }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ordered-items mt-5">
+                <h3 class="mb-4 d-flex align-items-center">
+                    <i class="bi bi-box me-2"></i>Product Details
+                </h3>
+
+                {% for item in order.items.all %}
+                <div class="card mb-3 border-0 shadow-sm hover-shadow product-card">
+                    <div class="card-body p-0">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-4 col-sm-3 col-md-2">
+                                <div class="p-3">
+                                    {% if item.get_product_image %}
+                                    <img src="{{ item.get_product_image }}"
+                                         alt="{{ item.product_variant.product.name }}"
+                                         class="img-fluid rounded-3 product-image">
+                                    {% else %}
+                                    <div class="no-image-placeholder rounded-3 bg-light d-flex align-items-center justify-content-center">
+                                        <i class="bi bi-image text-secondary"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="col-8 col-sm-9 col-md-10">
+                                <div class="p-3">
+                                    <h5 class="product-title mb-3">{{ item.product_variant.product.name }}</h5>
+                                    <div class="row g-3">
+                                        <div class="col-12 col-sm-6">
+                                            <div class="color-display mb-2">
+                                                <span class="text-muted me-2">Color:</span>
+                                                <div class="color-swatch" style="background-color: {{ item.product_variant.color }};"></div>
+                                            </div>
+                                            <p class="mb-2"><span class="text-muted">Size:</span> 
+                                                <span class="fw-bold">{{ item.product_variant.size }}</span>
+                                            </p>
+                                            <p class="mb-2"><span class="text-muted">Quantity:</span> 
+                                                <span class="fw-bold">{{ item.quantity }}</span>
+                                            </p>
+                                            <p class="mb-0"><span class="text-muted">Status:</span> 
+                                                <span class="badge {% if item.status == 'delivered' %}bg-success{% elif item.status == 'processing' %}bg-warning{% elif item.status == 'cancelled' %}bg-danger{% elif item.status == 'shipped' %}bg-primary{% else %}bg-info{% endif %}">
+                                                    {{ item.status|title }}
+                                                </span>
+                                            </p>
+                                        </div>
+
+                                        <div class="col-12 col-sm-6 text-sm-end">
+                                            <p class="mb-2">
+                                                <span class="text-muted">Original Price:</span> 
+                                                <span class="fw-bold price-old">₹{{ item.price }}</span>
+                                            </p>
+                                            <p class="mb-2">
+                                                <span class="text-muted">Offer Price:</span> 
+                                                <span class="fw-bold text-success">₹{{ item.offer_price }}</span>
+                                            </p>
+                                            <p class="mb-2">
+                                                <span class="text-muted">Discount:</span> 
+                                                <span class="text-danger">₹{{ item.discount }}</span>
+                                            </p>
+                                            <p class="mb-2 h5">
+                                                ₹{{ item.final_price }}
+                                            </p>
+                                            {% if item.status|lower == 'pending' or item.status|lower == 'processing' %}
+                                            <button onclick="cancelItem('{{ order.order_id }}', '{{ item.id }}')" 
+                                                    class="btn cancel-btn mt-2">
+                                                <i class="bi bi-x-circle me-2"></i>Cancel Item
+                                            </button>
+                                            {% elif item.status|lower == 'delivered' %}
+                                            <a href="{% url 'request_order_return' order_id=order.order_id item_id=item.id %}" 
+                                               class="btn return-btn mt-2">
+                                                <i class="bi bi-arrow-counterclockwise me-2"></i>Return Item
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card-footer bg-light py-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <a href="{% url 'order_history' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Orders
+                </a>
+                {% if order.status != 'Cancelled' and order.status != 'Processing' %}
+                <a href="{% url 'track_order' order.order_id %}" 
+                   class="btn btn-primary d-md-none">
+                    <i class="bi bi-truck me-1"></i>Track
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    function cancelItem(orderId, itemId) {
+        if (!orderId || !itemId) {
+            showNotification("Invalid order or item ID.", "error");
+            return;
+        }
+
+        if (confirm("Are you sure you want to cancel this item?")) {
+            fetch(`/order/cancel-item/${orderId}/${itemId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotification(data.message, data.success ? "success" : "error");
+                if (data.success) {
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                showNotification("An error occurred while cancelling the item.", "error");
+                console.error("Error:", error);
+            });
+        }
+    }
+
+    function cancelOrder(orderId) {
+        if (!orderId) {
+            showNotification("Invalid order ID.", "error");
+            return;
+        }
+        if (confirm("Are you sure you want to cancel this entire order?")) {
+            fetch(`/order/cancel-order/${orderId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": csrftoken,
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(data.message, data.success ? "success" : "error");
+                if (data.success) {
+                    setTimeout(() => location.reload(), 1500);
+                }
+            })
+            .catch(error => {
+                showNotification("An error occurred while cancelling the order.", "error");
+                console.error("Error:", error);
+            });
+        }
+    }
+
+    function printInvoice() {
+        const orderId = "{{ order.order_id }}";
+        const orderDate = "{{ order.order_date }}";
+        const paymentMethod = "{{ order.payment_method }}";
+        let itemsHtml = '';
+        {% for item in order.items.all %}
+            itemsHtml += `
+                <tr>
+                    <td>${"{{ item.product_variant.product.name }}"}</td>
+                    <td>${"{{ item.quantity }}"}</td>
+                    <td>₹${"{{ item.final_price }}"}</td>
+                </tr>
+            `;
+        {% endfor %}
+        const subtotal = "₹{{ order.subtotal }}";
+        const shippingCost = "₹{{ order.shipping_cost }}";
+        const couponDiscount = {% if order.coupon %}"₹{{ order.coupon_discount }}"{% else %}"₹0.00"{% endif %};
+        const productDiscount = "₹{{ order.product_discount }}";
+        const totalAmount = "₹{{ order.total_amount }}";
+
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Order Invoice - ${orderId}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        .invoice-header { text-align: center; margin-bottom: 20px; }
+                        .invoice-details { margin-bottom: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                        th { background-color: #f2f2f2; }
+                        .total-section { font-weight: bold; }
+                    </style>
+                </head>
+                <body onload="window.print();window.close()">
+                    <div class="invoice-header">
+                        <h2>Order Invoice</h2>
+                    </div>
+                    <div class="invoice-details">
+                        <p><strong>Order ID:</strong> ${orderId}</p>
+                        <p><strong>Order Date:</strong> ${orderDate}</p>
+                        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+                    </table>
+                    <div class="total-section">
+                        <p>Subtotal: ${subtotal}</p>
+                        <p>Shipping Cost: ${shippingCost}</p>
+                        <p>Coupon Discount: ${couponDiscount}</p>
+                        <p>Product Discount: ${productDiscount}</p>
+                        <p>Total Amount: ${totalAmount}</p>
+                    </div>
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
+    function showNotification(message, type) {
+        const existingNotification = document.querySelector(".notification");
+        if (existingNotification) {
+            existingNotification.remove();
+        }
+
+        const notificationContainer = document.createElement("div");
+        notificationContainer.className = `notification ${type} show`;
+        notificationContainer.innerHTML = `
+            <div class="notification-content">
+                <i class="bi ${type === "success" ? "bi-check-circle" : "bi-exclamation-circle"} notification-icon"></i>
+                <span class="notification-message">${message}</span>
+            </div>
+        `;
+
+        document.body.appendChild(notificationContainer);
+        
+        setTimeout(() => {
+            notificationContainer.classList.remove("show");
+            setTimeout(() => notificationContainer.remove(), 300);
+        }, 3000);
+    }
+</script>
+{% endblock %}

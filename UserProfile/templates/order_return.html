@@ -1,0 +1,79 @@
+{% extends 'user_dashboard.html' %}
+
+{% block user_content %}
+
+<style>
+    .card {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+</style>
+
+
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Return Request</h3>
+        </div>
+        <div class="card-body">
+            {% if item %}
+                <form action="{% url 'submit_order_return' order.order_id %}" method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="returnReason" class="form-label">Reason for Return</label>
+                        <textarea 
+                            class="form-control" 
+                            id="returnReason" 
+                            name="reason" 
+                            placeholder="Please explain why you want to return this item" 
+                            rows="4" 
+                            required
+                        ></textarea>
+                        <div class="invalid-feedback">
+                            Please provide a reason for the return.
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Submit Return Request
+                        </button>
+                    </div>
+                </form>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No item found for return request.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap form validation script -->
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
+
+
+{% endblock %}

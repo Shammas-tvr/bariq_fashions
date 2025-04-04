@@ -1,0 +1,102 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <h2 class="text-2xl font-bold text-gray-800">Category Offers</h2>
+        <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+            <a href="{% url 'add_category_offer' %}" 
+               class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 text-center">
+                + Add New Offer
+            </a>
+            <a href="{% url 'offers' %}" 
+               class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300 text-center">
+                Back to Offers
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-full">
+                <thead class="bg-gray-100 hidden md:table-header-group">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Category</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Image</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Offer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Discount</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">End Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    {% for offer in offers %}
+                    <tr class="hover:bg-gray-50 transition duration-150 flex flex-col md:table-row mb-6 md:mb-0">
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Category:</span>
+                            <span>{{ offer.category }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Image:</span>
+                            <div class="flex items-center">
+                                {% if offer.category.image %}
+                                    <img class="h-12 w-12 rounded-md object-cover border border-gray-200" 
+                                         src="{{ offer.category.image.url }}" 
+                                         alt="{{ offer.category.name }}" 
+                                         title="{{ offer.category.name }}">
+                                {% else %}
+                                    <div class="h-12 w-12 bg-gray-100 rounded-md flex items-center justify-center">
+                                        <span class="text-xs text-gray-500">No Image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Offer:</span>
+                            <span>{{ offer.offer_name }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Discount:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                {{ offer.discount_percentage }}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">End:</span>
+                            <span>{{ offer.end_date|date:"Y-m-d" }}</span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Status:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium 
+                                {% if offer.is_active %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {{ offer.is_active|yesno:"Active,Inactive" }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-2 md:py-4 flex justify-between md:table-cell">
+                            <span class="font-medium md:hidden">Actions:</span>
+                            <div class="space-x-2">
+                                <a href="{% url 'edit_category_offer' offer.id %}" 
+                                   class="text-blue-600 hover:text-blue-800 font-medium">Edit</a>
+                                <a href="{% url 'toggle_category_offer_status' offer.id %}" 
+                                   class="font-medium {% if offer.is_active %}text-red-600 hover:text-red-800{% else %}text-green-600 hover:text-green-800{% endif %}">
+                                    {% if offer.is_active %}Block{% else %}Unblock{% endif %}
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No offers available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+{% endblock %}
