@@ -3,9 +3,20 @@
 {% block content %}
 
 <div class="container mx-auto px-4 py-6">
+    <!-- Messages Display Section -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% elif message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="flex justify-between items-center mb-6 no-print">
-        <h2 class="text-2xl font-bold dark:text-white">Order #{{ order.order_id }}</h2>
-        <a href="{% url 'order-list' %}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200">
+        <h2 class="text-2xl font-bold">Order #{{ order.order_id }}</h2>
+        <a href="{% url 'order-list' %}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200">
             <i class="fas fa-arrow-left mr-2"></i>Back to Orders
         </a>
     </div>
@@ -17,36 +28,36 @@
     </div>
 
     <!-- Order Info Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Order Information</h3>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 border-b pb-2">Order Information</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <p class="mb-2"><span class="font-medium dark:text-gray-300">Order ID:</span> <span class="dark:text-white">{{ order.order_id }}</span></p>
-                <p class="mb-2"><span class="font-medium dark:text-gray-300">Order Date:</span> <span class="dark:text-white">{{ order.order_date|date:"F j, Y, g:i a" }}</span></p>
+                <p class="mb-2"><span class="font-medium text-gray-700">Order ID:</span> {{ order.order_id }}</p>
+                <p class="mb-2"><span class="font-medium text-gray-700">Order Date:</span> {{ order.order_date|date:"F j, Y, g:i a" }}</p>
             </div>
             <div>
-                <p class="mb-2"><span class="font-medium dark:text-gray-300">Payment Method:</span> <span class="dark:text-white">{{ order.payment_method }}</span></p>
-                <p class="mb-2"><span class="font-medium dark:text-gray-300">Tracking Number:</span> <span class="dark:text-white">{{ order.tracking_number|default:"Not available" }}</span></p>
+                <p class="mb-2"><span class="font-medium text-gray-700">Payment Method:</span> {{ order.payment_method }}</p>
+                <p class="mb-2"><span class="font-medium text-gray-700">Tracking Number:</span> {{ order.tracking_number|default:"Not available" }}</p>
             </div>
         </div>
     </div>
 
     <!-- Customer Info Card -->
     {% if order.address %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Customer Information</h3>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 border-b pb-2">Customer Information</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Customer Details</h4>
-                <p class="mb-1 dark:text-white">{{ order.user.get_full_name|default:order.user.username }}</p>
-                <p class="mb-1 dark:text-white">{{ order.user.email }}</p>
-                <p class="mb-1 dark:text-white">{{ order.address.phone }}</p>
+                <h4 class="font-medium text-gray-700 mb-2">Customer Details</h4>
+                <p class="mb-1">{{ order.user.get_full_name|default:order.user.username }}</p>
+                <p class="mb-1">{{ order.user.email }}</p>
+                <p class="mb-1">{{ order.address.phone }}</p>
             </div>
             <div>
-                <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Shipping Address</h4>
-                <p class="mb-1 dark:text-white">{{ order.address.full_name }}</p>
-                <p class="mb-1 dark:text-white">{{ order.address.address }}</p>
-                <p class="mb-1 dark:text-white">{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pin_code }}</p>
+                <h4 class="font-medium text-gray-700 mb-2">Shipping Address</h4>
+                <p class="mb-1">{{ order.address.full_name }}</p>
+                <p class="mb-1">{{ order.address.address }}</p>
+                <p class="mb-1">{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pin_code }}</p>
             </div>
         </div>
     </div>
@@ -55,21 +66,21 @@
     {% endif %}
 
     <!-- Order Items Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Order Items</h3>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 border-b pb-2">Order Items</h3>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Price</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Offer Price</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Quantity</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Subtotal</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Offer Price</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subtotal</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200">
                     {% for item in order.items.all %}
                     <tr>
                         <td class="px-4 py-3">
@@ -81,31 +92,31 @@
                                     </div>
                                     {% endif %}
                                     <div>
-                                        <p class="font-medium text-gray-800 dark:text-white">{{ product.name }}</p>
+                                        <p class="font-medium text-gray-800">{{ product.name }}</p>
                                         {% if item.product_variant.color %}
                                         <div class="flex items-center">
-                                            <span class="variant-label text-sm text-gray-500 dark:text-gray-400">Color:</span>
+                                            <span class="variant-label text-sm text-gray-500">Color:</span>
                                             <div class="w-5 h-5 ml-2 rounded-full border border-gray-300 no-print" 
                                                  style="background-color: {{ item.product_variant.color }};">
                                             </div>
                                             <span class="print-only ml-2">{{ item.product_variant.color }}</span>
                                         </div>
                                         {% endif %}
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Size: {{ item.product_variant.size }}</p>
+                                        <p class="text-sm text-gray-500">Size: {{ item.product_variant.size }}</p>
                                     </div>
                                 {% endwith %}
                             </div>
                         </td>
-                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 line-through">{{ item.price|floatformat:2 }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                        <td class="px-4 py-3 text-sm text-gray-600 line-through">{{ item.price|floatformat:2 }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600 font-semibold">
                             {% if item.offer_price %}
                                 {{ item.offer_price|floatformat:2 }}
                             {% else %}
                                 -
                             {% endif %}
                         </td>
-                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ item.quantity }}</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">{{ item.final_price|floatformat:2 }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ item.quantity }}</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800">{{ item.final_price|floatformat:2 }}</td>
                         <td class="px-4 py-3">
                             <span class="px-2 py-1 rounded-full text-sm font-semibold print-only print-status
                                 {% if item.status == 'pending' %}bg-yellow-100 text-yellow-800
@@ -155,7 +166,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                        <td colspan="6" class="text-center text-gray-500 py-4">
                             No products found in this order.
                         </td>
                     </tr>
@@ -163,40 +174,40 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Subtotal:</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700">Subtotal:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800">
                             {{ order.subtotal|floatformat:2 }}
                         </td>
                     </tr>
                     {% if order.product_discount > 0 %}
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Product Discount:</td>
-                        <td class="px-4 py-3 text-sm font-medium text-green-600 dark:text-green-400">
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700">Product Discount:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-green-600">
                             -{{ order.product_discount|floatformat:2 }}
                         </td>
                     </tr>
                     {% endif %}
                     {% if order.coupon and order.coupon_discount > 0 %}
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700">
                             Coupon Discount ({{ order.coupon.code }}):
                         </td>
-                        <td class="px-4 py-3 text-sm font-medium text-green-600 dark:text-green-400">
+                        <td class="px-4 py-3 text-sm font-medium text-green-600">
                             -{{ order.coupon_discount|floatformat:2 }}
                         </td>
                     </tr>
                     {% endif %}
                     {% if order.shipping_cost > 0 %}
                     <tr>
-                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700 dark:text-gray-300">Shipping Cost:</td>
-                        <td class="px-4 py-3 text-sm font-medium text-gray-800 dark:text-white">
+                        <td colspan="5" class="px-4 py-3 text-right font-medium text-gray-700">Shipping Cost:</td>
+                        <td class="px-4 py-3 text-sm font-medium text-gray-800">
                             {{ order.shipping_cost|floatformat:2 }}
                         </td>
                     </tr>
                     {% endif %}
-                    <tr class="bg-gray-50 dark:bg-gray-700">
-                        <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-800 dark:text-white">Total:</td>
-                        <td class="px-4 py-3 text-sm font-bold text-gray-800 dark:text-white">
+                    <tr class="bg-gray-50">
+                        <td colspan="5" class="px-4 py-3 text-right font-bold text-gray-800">Total:</td>
+                        <td class="px-4 py-3 text-sm font-bold text-gray-800">
                             {{ order.total_amount|floatformat:2 }}
                         </td>
                     </tr>
@@ -207,18 +218,18 @@
 
     <!-- Order Notes Card -->
     {% if order.notes or order.admin_notes %}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-        <h3 class="text-lg font-semibold mb-4 dark:text-white border-b pb-2">Notes</h3>
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <h3 class="text-lg font-semibold mb-4 border-b pb-2">Notes</h3>
         {% if order.notes %}
         <div class="mb-4">
-            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Customer Notes</h4>
-            <p class="dark:text-white">{{ order.notes }}</p>
+            <h4 class="font-medium text-gray-700 mb-2">Customer Notes</h4>
+            <p>{{ order.notes }}</p>
         </div>
         {% endif %}
         {% if order.admin_notes %}
         <div>
-            <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-2">Admin Notes</h4>
-            <p class="dark:text-white">{{ order.admin_notes }}</p>
+            <h4 class="font-medium text-gray-700 mb-2">Admin Notes</h4>
+            <p>{{ order.admin_notes }}</p>
         </div>
         {% endif %}
     </div>
@@ -226,9 +237,9 @@
 
     <!-- Action Buttons -->
     <div class="flex flex-wrap gap-3 justify-end mt-6 no-print">
-        <button type="button" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200" onclick="printInvoice()">
-            <i class="fas fa-print mr-2"></i>Print
-        </button>
+        <a href="{% url 'invoice' order.order_id %}" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+            <i class="fas fa-print mr-2"></i>Print Invoice
+        </a>
     </div>
 
     <!-- Invoice Footer for Print -->
@@ -268,14 +279,14 @@
             font-size: 24pt;
             margin-bottom: 5mm;
         }
-        .bg-white, .dark:bg-gray-800 {
+        .bg-white {
             background: white !important;
             box-shadow: none !important;
             border: 1px solid #000;
             margin-bottom: 10mm;
             padding: 5mm;
         }
-        .dark:text-white, .text-gray-800, .text-gray-600 {
+        .text-gray-800, .text-gray-600 {
             color: black !important;
         }
         .print-status {
@@ -330,9 +341,4 @@
     }
 </style>
 
-<script>
-function printInvoice() {
-    window.print();
-}
-</script>
 {% endblock %}

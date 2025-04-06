@@ -1,10 +1,87 @@
+<!-- admin_order_list.html -->
 {% extends 'base_admin.html' %}
 
 {% block styles %}
-    <!-- Add any additional styles specific to this page -->
     <style>
         a {
             text-decoration: none; /* Removes underline from all links */
+        }
+        /* Pagination Styles */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+        .pagination a, .pagination span {
+            padding: 0.65rem 1rem;
+            border-radius: 2rem; /* Circular edges */
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.25s ease-in-out;
+            min-width: 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .pagination .page-link {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #e2e8f0;
+            color: #4b5563;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .pagination .page-link:hover {
+            background: linear-gradient(145deg, #3b82f6, #2563eb);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+        .pagination .current {
+            background: linear-gradient(145deg, #2563eb, #1e40af);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            transform: scale(1.05);
+        }
+        .pagination .nav-link {
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 1px solid #e2e8f0;
+            color: #2563eb;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        .pagination .nav-link:hover:not(.disabled) {
+            background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+            border-color: #93c5fd;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            transform: translateY(-1px);
+        }
+        .pagination .disabled {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.65;
+            box-shadow: none;
+        }
+        /* Optional: Add subtle animation for active page */
+        .pagination .current::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0; }
+            50% { opacity: 0.1; }
+            100% { opacity: 0; }
         }
     </style>
 {% endblock %}
@@ -12,30 +89,30 @@
 {% block content %}
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold dark:text-white">My Orders</h2>
+        <h2 class="text-2xl font-bold text-gray-800">My Orders</h2>
     </div>
 
     <!-- Orders Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6">
         <!-- Orders Table -->
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Method</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order Date</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Method</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200">
                     {% for order in orders %}
                     <tr>
-                        <td class="px-4 py-3 text-sm text-gray-800 dark:text-white">#{{ order.order_id }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-800 dark:text-white">{{ order.user.username }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ order.payment_method }}</td>
-                        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ order.order_date|date:"M d, Y" }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-800">#{{ order.order_id }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-800">{{ order.user.username }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ order.payment_method }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-600">{{ order.order_date|date:"M d, Y" }}</td>
                         <td class="px-4 py-3">
                             <a href="{% url 'admin_order_detail' order.order_id %}" 
                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200 text-center">
@@ -45,7 +122,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center text-gray-500 dark:text-gray-400 py-4">
+                        <td colspan="5" class="text-center text-gray-500 py-4">
                             <i class="bi bi-box-seam me-2"></i>No orders found
                         </td>
                     </tr>
@@ -53,6 +130,31 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+        <div class="pagination">
+            {% if orders.has_previous %}
+                <a href="?page={{ orders.previous_page_number }}" class="nav-link">« Prev</a>
+            {% else %}
+                <span class="nav-link disabled">« Prev</span>
+            {% endif %}
+
+            {% for num in orders.paginator.page_range %}
+                {% if orders.number == num %}
+                    <span class="current">{{ num }}</span>
+                {% elif num > orders.number|add:'-3' and num < orders.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if orders.has_next %}
+                <a href="?page={{ orders.next_page_number }}" class="nav-link">Next »</a>
+            {% else %}
+                <span class="nav-link disabled">Next »</span>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

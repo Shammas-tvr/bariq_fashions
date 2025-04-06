@@ -1,19 +1,17 @@
 from django.shortcuts import render, redirect,get_object_or_404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required,user_passes_test
-from django.contrib.auth.hashers import make_password
 from users.models import CustomUser
 from django.core.paginator import Paginator
 from users.models import CustomUser
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
-from django.db.models import Sum, Count
-from datetime import datetime, timedelta
+from django.db.models import Sum
+from datetime import timedelta
 from orders.models import Order, OrderItem
 from django.utils import timezone
-from products.models import Product
-from category.models import Category
+
 
 
 
@@ -42,13 +40,17 @@ def BariqadminLogin(request):
    
     return render(request, 'adminlogin.html')
 
+def admin_logout(request):
+    logout(request)
+    return redirect('admin_login')
+
 
 
 
 def is_admin(User):
     return User.is_staff
 
-
+#_______________________________________________________________________________________________________________________________#
 def Admin_Dashboard(request):
     # Get time filter from request (default: this month)
     filter_type = request.GET.get('filter', 'monthly')
@@ -114,23 +116,7 @@ def Admin_Dashboard(request):
     return render(request, "admin-dashboard.html", context)
 
 
-@login_required
-@user_passes_test(is_admin)
-def add_user(request):
-    if request.method =='POST':
-        username=request.POST['username']
-        email=request.POST['email']
-        password=request.POST['password']
-        is_staff= 'is_staff' in request.POST 
 
-        CustomUser.objects.create(
-            username=username,
-            email=email,
-            password=make_password(password),
-            is_staff=is_staff
-        )
-        return redirect('user_management.html')
-    return render(request,'add_user.html') 
 
 @login_required
 @user_passes_test(is_admin)
@@ -164,11 +150,7 @@ def unblock_user(request,users_id):
     users.save()
 
     return redirect('user_management.html')
-from django.shortcuts import render, get_object_or_404, redirect
-from django.core.paginator import Paginator
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-from users.models import CustomUser
+
 
 
 @login_required
@@ -199,6 +181,8 @@ def toggle_user_status(request):
 
 def offers(request):
     return render(request,'offers.html')
+
+
 
 
 

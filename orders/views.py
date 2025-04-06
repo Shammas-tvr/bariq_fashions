@@ -709,21 +709,7 @@ def admin_order_list(request):
         'total_orders': orders_list.count()
     })
 
-@staff_member_required
-def update_order_status(request, order_id): 
-    if request.method == "POST":
-        new_status = request.POST.get("status")
 
-        order = get_object_or_404(Order, order_id=order_id)
-        
-        if new_status in dict(Order.STATUS_CHOICES):
-            order.status = new_status
-            order.save()
-            return JsonResponse({"success": True, "message": "Order status updated!", "new_status": order.get_status_display()})
-        else:
-            return JsonResponse({"success": False, "message": "Invalid status!"})
-    
-    return JsonResponse({"success": False, "message": "Invalid request method!"})
 
 
 @staff_member_required
@@ -740,11 +726,33 @@ def admin_update_order_item_status(request, order_id, item_id):
 
     if request.method == "POST":
         new_status = request.POST.get("status")
-        if new_status:
-            order_item.status = new_status
-            order_item.save()
+
+        if not new_status:
+            messages.error(request, "No status provided.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        all_items = order.items.all() 
+
+        all_cancelled = all(item.status == 'cancelled' for item in all_items)
+
+        if all_cancelled:
+            messages.error(request, "This order is fully cancelled. You cannot update item statuses.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        if order_item.status == 'cancelled' and new_status == 'delivered':
+            messages.error(request, "Cannot deliver an item that has already been cancelled.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        if order_item.status == 'delivered' and new_status == 'cancelled':
+            messages.error(request, "Cannot cancel an item that has already been deliverd .")
+            return redirect('admin_order_detail', order_id=order.order_id)
+        
+        order_item.status = new_status
+        order_item.save()
+        messages.success(request, f"Item status updated to {new_status.capitalize()}.")
 
     return redirect('admin_order_detail', order_id=order.order_id)
+
 
 
 #--------------------------------------------------------------------------------------------------------------------------------#
@@ -808,6 +816,16 @@ def apply_coupon(request):
         order=request.session.get("order_id")
 
 
+#__________________________________________________________________________________________________________________________#
+# print invoice 
+
+@staff_member_required
+def admin_invoice(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id)
+    context = {
+        'order': order,
+    }
+    return render(request, 'admin_invoice.html', context)
 
 
 

@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Bariq Men's Fashions</title>
+    <!-- Bootstrap Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
         * {
@@ -482,6 +484,27 @@
             justify-content: center;
         }
 
+        .payment-icon i {
+            font-size: 16px;
+        }
+
+        /* Colorful payment icons */
+        .payment-icon.visa i {
+            color: #1A1F71; /* Visa Blue */
+        }
+
+        .payment-icon.mastercard i {
+            color: #EB001B; /* Mastercard Red */
+        }
+
+        .payment-icon.paypal i {
+            color: #009CDE; /* PayPal Blue */
+        }
+
+        .payment-icon.gpay i {
+            color: #3CBA54; /* Google Pay Green */
+        }
+
         /* Messages */
         .messages {
             position: fixed;
@@ -813,17 +836,17 @@
                     © 2025 Bariq Men's Fashions. All rights reserved.
                 </div>
                 <div class="payment-methods">
-                    <span class="payment-icon">
-                        <img src="{% static 'images/visa.png' %}" alt="Visa" width="30" height="18">
+                    <span class="payment-icon visa">
+                        <i class="bi bi-credit-card"></i>
                     </span>
-                    <span class="payment-icon">
-                        <img src="{% static 'images/mastercard.png' %}" alt="Mastercard" width="30" height="18">
+                    <span class="payment-icon mastercard">
+                        <i class="bi bi-credit-card-2-front"></i>
                     </span>
-                    <span class="payment-icon">
-                        <img src="{% static 'images/paypal.png' %}" alt="PayPal" width="30" height="18">
+                    <span class="payment-icon paypal">
+                        <i class="bi bi-paypal"></i>
                     </span>
-                    <span class="payment-icon">
-                        <img src="{% static 'images/gpay.png' %}" alt="Google Pay" width="30" height="18">
+                    <span class="payment-icon gpay">
+                        <i class="bi bi-wallet2"></i>
                     </span>
                 </div>
             </div>

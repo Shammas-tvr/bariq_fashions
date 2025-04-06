@@ -1,5 +1,5 @@
 <!-- offers.html -->
-{% extends 'base_admin.html' %} <!-- Assuming your original template is named base.html -->
+{% extends 'base_admin.html' %}
 
 {% block header_title %}Offers Management{% endblock %}
 
@@ -7,30 +7,30 @@
 <div class="max-w-7xl mx-auto">
     <!-- Page Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Offers Management</h1>
-        <p class="mt-2 text-gray-600 dark:text-gray-400">Create and manage offers for categories or individual products</p>
+        <h1 class="text-3xl font-bold text-gray-900">Offers Management</h1>
+        <p class="mt-2 text-gray-600">Create and manage offers for categories or individual products</p>
     </div>
 
     <!-- Offer Options -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Category Offer Card -->
-        <a href="{% url 'category_offer_list'%}" class="group block bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+        <a href="{% url 'category_offer_list'%}" class="group block bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200">
             <div class="p-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="bg-primary-100 dark:bg-primary-900 p-3 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-800 transition-colors">
-                            <span class="material-icons-round text-primary-600 dark:text-primary-400 text-2xl">category</span>
+                        <div class="bg-primary-100 p-3 rounded-lg group-hover:bg-primary-200 transition-colors">
+                            <span class="material-icons-round text-primary-600 text-2xl">category</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                            <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
                                 Category Offer
                             </h3>
-                            <p class="mt-1 text-gray-600 dark:text-gray-400 text-sm">
+                            <p class="mt-1 text-gray-600 text-sm">
                                 Create offers for entire product categories
                             </p>
                         </div>
                     </div>
-                    <span class="material-icons-round text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    <span class="material-icons-round text-gray-400 group-hover:text-primary-600 transition-colors">
                         arrow_forward
                     </span>
                 </div>
@@ -38,23 +38,23 @@
         </a>
 
         <!-- Product Offer Card -->
-        <a href="{% url 'product_offer_list' %}" class="group block bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+        <a href="{% url 'product_offer_list' %}" class="group block bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200">
             <div class="p-6">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="bg-primary-100 dark:bg-primary-900 p-3 rounded-lg group-hover:bg-primary-200 dark:group-hover:bg-primary-800 transition-colors">
-                            <span class="material-icons-round text-primary-600 dark:text-primary-400 text-2xl">inventory</span>
+                        <div class="bg-primary-100 p-3 rounded-lg group-hover:bg-primary-200 transition-colors">
+                            <span class="material-icons-round text-primary-600 text-2xl">inventory</span>
                         </div>
                         <div>
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                            <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
                                 Product Offer
                             </h3>
-                            <p class="mt-1 text-gray-600 dark:text-gray-400 text-sm">
+                            <p class="mt-1 text-gray-600 text-sm">
                                 Create offers for specific products
                             </p>
                         </div>
                     </div>
-                    <span class="material-icons-round text-gray-400 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                    <span class="material-icons-round text-gray-400 group-hover:text-primary-600 transition-colors">
                         arrow_forward
                     </span>
                 </div>
@@ -64,39 +64,39 @@
 
     <!-- Recent Offers Section (Optional) -->
     <div class="mt-12">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Recent Offers</h2>
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6">Recent Offers</h2>
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
             <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Offer Name
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Type
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Discount
                         </th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                         </th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-200">
                     <!-- Sample Row - You can populate this dynamically -->
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200">
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             Summer Sale
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                             Category
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                             20%
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 Active
                             </span>
                         </td>

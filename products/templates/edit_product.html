@@ -6,23 +6,23 @@
 
 <div class="container mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold dark:text-white">Edit Product</h2>
+        <h2 class="text-2xl font-bold">Edit Product</h2>
         <a href="{% url 'product_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
             Back to List
         </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6">
         <!-- Error Messages -->
         {% if errors %}
-        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
-            <div class="flex items-center text-red-800 dark:text-red-500">
+        <div class="mb-6 p-4 bg-red-50 rounded-lg">
+            <div class="flex items-center text-red-800">
                 <svg class="w-5 h-5 flex-shrink-0 mr-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
                 </svg>
                 <h3 class="text-sm font-medium">Please fix these errors:</h3>
             </div>
-            <ul class="mt-2 text-sm text-red-700 dark:text-red-400 list-disc pl-5 space-y-1">
+            <ul class="mt-2 text-sm text-red-700 list-disc pl-5 space-y-1">
                 {% for error in errors %}
                 <li>{{ error }}</li>
                 {% endfor %}
@@ -35,41 +35,42 @@
             <div class="space-y-4">
                 <!-- Product Name -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
+                    <label class="block text-sm font-medium">Product Name</label>
                     <input type="text" name="name" value="{{ product.name }}" required 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
                 <!-- Description -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                    <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3">{{ product.description }}</textarea>
+                    <label class="block text-sm font-medium">Description</label>
+                    <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" rows="3">{{ product.description }}</textarea>
                 </div>
 
                 <!-- Price -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
+                    <label class="block text-sm font-medium">Price</label>
                     <input type="number" name="price" step="0.01" value="{{ product.price }}" required 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
                 <!-- Offer Price -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Offer Price</label>
+                    <label class="block text-sm font-medium">Offer Price</label>
                     <input type="number" name="offer_price" step="0.01" value="{{ product.offer_price }}" 
-                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
+
                 <!-- Brand -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Brand</label>
-                    <input type="text" name="brand" maxlength="20" value="{{ product.Brand|default:'' }}"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label class="block text-sm font-medium">Brand</label>
+                    <input type="text" name="brand" maxlength="20" value="{{ product.brand|default:'' }}"
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                 </div>
 
                 <!-- Category -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                    <select name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <label class="block text-sm font-medium">Category</label>
+                    <select name="category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         {% for category in categories %}
                         <option value="{{ category.id }}" {% if category.id == product.category.id %}selected{% endif %}>
                             {{ category.name }}
@@ -78,11 +79,9 @@
                     </select>
                 </div>
 
-
-
                 <!-- Buttons -->
                 <div class="flex justify-end space-x-3 mt-6">
-                    <a href="{% url 'product_list' %}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                    <a href="{% url 'product_list' %}" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
                         Cancel
                     </a>
                     <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">

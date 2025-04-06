@@ -285,8 +285,8 @@ def Facebook_Athen(request):
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
 def bariq_homepage(request):
-    categories = Category.objects.all()
-
+    category = Category.objects.all()
+    categories=category[:5]
     all_products = list(Product.objects.filter(is_active=True, variants__is_active=True).distinct().prefetch_related('variants__images'))
 
     random.shuffle(all_products)

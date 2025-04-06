@@ -20,7 +20,6 @@ urlpatterns = [
 
     #order area
     path('order/cancel-item/<str:order_id>/<int:item_id>/', views.cancel_order_item, name='cancel_order_item'),
-    path('delete-address/<int:address_id>/', views.delete_address, name='userprofile_delete_address'),
     path('order-history/', views.order_history, name='order_history'),
     path("order/<str:order_id>/", views.order_detail, name="order_details"),
     path('order-tracking/<str:order_id>/', views.order_tracking, name='track_order'),
@@ -28,7 +27,8 @@ urlpatterns = [
     path('order/<str:order_id>/return/<int:item_id>/',views.request_order_return, name='request_order_return'),
     path('order/<str:order_id>/submit-return/', views.submit_order_return, name='submit_order_return'),
 
-
+      #order invoice 
+    path('user_invoice/<str:order_id>/',views.user_invoice,name='user_invoice'), 
       
     
     # search area

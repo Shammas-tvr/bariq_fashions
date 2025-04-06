@@ -6,38 +6,38 @@
 
 <div class="container mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold dark:text-white">Add Product</h2>
+        <h2 class="text-2xl font-bold">Add Product</h2>
         <a href="{% url 'product_list' %}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg">
             Back to List
         </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product Name</label>
-                <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <label class="block text-sm font-medium">Product Name</label>
+                <input type="text" name="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div class="form-group mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows="3"></textarea>
+                <label class="block text-sm font-medium">Description</label>
+                <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" rows="3"></textarea>
             </div>
             <div class="form-group mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Price</label>
-                <input type="number" name="price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <label class="block text-sm font-medium">Price</label>
+                <input type="number" name="price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div class="form-group mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Offer Price</label>
-                <input type="number" name="offer_price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <label class="block text-sm font-medium">Offer Price</label>
+                <input type="number" name="offer_price" step="0.01" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div class="form-group mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Brand</label>
-                <input type="text" name="brand" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <label class="block text-sm font-medium">Brand</label>
+                <input type="text" name="brand" maxlength="20" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
             </div>
             <div class="form-group mt-4">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                <select name="category" id="categorySelect" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <label class="block text-sm font-medium">Category</label>
+                <select name="category" id="categorySelect" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     {% for category in categories %}
                     <option value="{{ category.id }}">{{ category.name }}</option>
                     {% endfor %}
@@ -45,7 +45,7 @@
             </div>
 
             <div class="flex justify-end space-x-3 mt-6">
-                <a href="{% url 'product_list' %}" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                <a href="{% url 'product_list' %}" class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
                     Cancel
                 </a>
                 <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">

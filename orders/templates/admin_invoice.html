@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice #{{ order.order_id }} - Bariq Men's Fashion</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 28px;
+            margin: 0;
+            color: #1a73e8;
+        }
+        .header .company-info p {
+            margin: 2px 0;
+            font-size: 14px;
+            color: #666;
+        }
+        .header .invoice-info {
+            text-align: right;
+        }
+        .header .invoice-info h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #333;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            font-size: 18px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .details-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .details-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+        }
+        td {
+            font-size: 14px;
+        }
+        .total-row {
+            font-weight: bold;
+            background: #f9f9f9;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #333;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .no-print {
+            margin-top: 20px;
+            text-align: center;
+        }
+        button, a.button {
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0 10px;
+        }
+        button:hover, a.button:hover {
+            background: #1557b0;
+        }
+        a.button.secondary {
+            background: #666;
+        }
+        a.button.secondary:hover {
+            background: #555;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .invoice-box {
+                border: none;
+                box-shadow: none;
+                margin: 0;
+                padding: 20mm;
+                max-width: 100%;
+            }
+            body {
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-box">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <h1>Bariq Men's Fashion</h1>
+                <p>Premium Men's Clothing & Accessories</p>
+            </div>
+            <div class="invoice-info">
+                <h2>INVOICE</h2>
+                <p>Order #{{ order.order_id }}</p>
+                <p>Date: {{ order.order_date|date:"F j, Y" }}</p>
+            </div>
+        </div>
+
+        <!-- Customer and Shipping Details -->
+        <div class="section details-grid">
+            <div class="details-box">
+                <h3>Customer Details</h3>
+                <p><strong>{{ order.user.get_full_name|default:order.user.username }}</strong></p>
+                <p>{{ order.user.email }}</p>
+                {% if order.address.phone %}
+                <p>Phone: {{ order.address.phone }}</p>
+                {% endif %}
+            </div>
+            {% if order.address %}
+            <div class="details-box">
+                <h3>Shipping Address</h3>
+                <p><strong>{{ order.address.full_name }}</strong></p>
+                <p>{{ order.address.address }}</p>
+                <p>{{ order.address.city }}, {{ order.address.state }} - {{ order.address.pin_code }}</p>
+            </div>
+            {% else %}
+            <div class="details-box">
+                <h3>Shipping Address</h3>
+                <p>No shipping address provided</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Order Items -->
+        <div class="section">
+            <h3>Order Items</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Offer Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items.all %}
+                    <tr>
+                        <td>
+                            {{ item.product_variant.product.name }}
+                            {% if item.product_variant.color %}
+                            <br><small>Color: {{ item.product_variant.color }}</small>
+                            {% endif %}
+                            {% if item.product_variant.size %}
+                            <br><small>Size: {{ item.product_variant.size }}</small>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td><s>₹{{ item.price|floatformat:2 }}</s></td>
+                        <td>
+                            {% if item.offer_price %}
+                            ₹{{ item.offer_price|floatformat:2 }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>₹{{ item.final_price|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No items in this order</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-right">Subtotal:</td>
+                        <td>₹{{ order.subtotal|floatformat:2 }}</td>
+                    </tr>
+                    {% if order.product_discount > 0 %}
+                    <tr>
+                        <td colspan="4" class="text-right">Product Discount:</td>
+                        <td>-₹{{ order.product_discount|floatformat:2 }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if order.coupon and order.coupon_discount > 0 %}
+                    <tr>
+                        <td colspan="4" class="text-right">Coupon ({{ order.coupon.code }}):</td>
+                        <td>-₹{{ order.coupon_discount|floatformat:2 }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if order.shipping_cost > 0 %}
+                    <tr>
+                        <td colspan="4" class="text-right">Shipping:</td>
+                        <td>₹{{ order.shipping_cost|floatformat:2 }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr class="total-row">
+                        <td colspan="4" class="text-right">Total:</td>
+                        <td>₹{{ order.total_amount|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="section">
+            <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+            <p><strong>Tracking Number:</strong> {{ order.tracking_number|default:"Not available" }}</p>
+            {% if order.notes %}
+            <p><strong>Customer Notes:</strong> {{ order.notes }}</p>
+            {% endif %}
+            {% if order.admin_notes %}
+            <p><strong>Admin Notes:</strong> {{ order.admin_notes }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Thank you for shopping with Bariq Men's Fashion!</p>
+            <p>Generated on: {{ "now"|date:"F j, Y" }}</p>
+            <p>Contact us: support@bariqmensfashion.com | +1-800-555-1234</p>
+        </div>
+
+        <!-- Buttons -->
+        <div class="no-print">
+            <a href="{% url 'admin_order_detail' order.order_id %}" class="button secondary">📋 Order Details</a>
+            <button onclick="window.print()">🖨️ Print Invoice</button>
+        </div>
+    </div>
+</body>
+</html>

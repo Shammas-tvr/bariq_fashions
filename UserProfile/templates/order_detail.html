@@ -339,20 +339,10 @@
                     <i class="bi bi-bag-check me-2"></i>Order Details
                 </span>
                 <div class="d-flex gap-2">
-                    {% if order.status|lower == 'pending' or order.status|lower == 'processing' %}
-                    <button onclick="cancelOrder('{{ order.order_id }}')" 
-                            class="btn order-cancel-btn">
-                        <i class="bi bi-x-circle me-2"></i>Cancel Order
-                    </button>
-                    {% elif order.status|lower == 'delivered' %}
-                    <a href="{% url 'request_order_return' order_id=order.order_id item_id=0 %}" 
-                       class="btn order-return-btn">
-                        <i class="bi bi-arrow-counterclockwise me-2"></i>Return Order
-                    </a>
-                    {% endif %}
-                    <button onclick="printInvoice()" class="btn btn-light">
+                    <a href="{% url 'user_invoice' order.order_id %}" 
+                       class="btn btn-light" >
                         <i class="bi bi-printer me-2"></i>Print Invoice
-                    </button>
+                    </a>
                 </div>
             </h2>
         </div>
@@ -609,75 +599,6 @@
                 console.error("Error:", error);
             });
         }
-    }
-
-    function printInvoice() {
-        const orderId = "{{ order.order_id }}";
-        const orderDate = "{{ order.order_date }}";
-        const paymentMethod = "{{ order.payment_method }}";
-        let itemsHtml = '';
-        {% for item in order.items.all %}
-            itemsHtml += `
-                <tr>
-                    <td>${"{{ item.product_variant.product.name }}"}</td>
-                    <td>${"{{ item.quantity }}"}</td>
-                    <td>₹${"{{ item.final_price }}"}</td>
-                </tr>
-            `;
-        {% endfor %}
-        const subtotal = "₹{{ order.subtotal }}";
-        const shippingCost = "₹{{ order.shipping_cost }}";
-        const couponDiscount = {% if order.coupon %}"₹{{ order.coupon_discount }}"{% else %}"₹0.00"{% endif %};
-        const productDiscount = "₹{{ order.product_discount }}";
-        const totalAmount = "₹{{ order.total_amount }}";
-
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Order Invoice - ${orderId}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .invoice-header { text-align: center; margin-bottom: 20px; }
-                        .invoice-details { margin-bottom: 20px; }
-                        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f2f2f2; }
-                        .total-section { font-weight: bold; }
-                    </style>
-                </head>
-                <body onload="window.print();window.close()">
-                    <div class="invoice-header">
-                        <h2>Order Invoice</h2>
-                    </div>
-                    <div class="invoice-details">
-                        <p><strong>Order ID:</strong> ${orderId}</p>
-                        <p><strong>Order Date:</strong> ${orderDate}</p>
-                        <p><strong>Payment Method:</strong> ${paymentMethod}</p>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Product Name</th>
-                                <th>Quantity</th>
-                                <th>Price</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${itemsHtml}
-                        </tbody>
-                    </table>
-                    <div class="total-section">
-                        <p>Subtotal: ${subtotal}</p>
-                        <p>Shipping Cost: ${shippingCost}</p>
-                        <p>Coupon Discount: ${couponDiscount}</p>
-                        <p>Product Discount: ${productDiscount}</p>
-                        <p>Total Amount: ${totalAmount}</p>
-                    </div>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
     }
 
     function showNotification(message, type) {

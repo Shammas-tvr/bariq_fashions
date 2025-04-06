@@ -7,11 +7,11 @@
 {% block content %}
 <div class="space-y-6">
     <!-- Filter Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+    <div class="bg-white rounded-lg shadow-sm p-6">
         <form method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter Type</label>
-                <select name="filter" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Type</label>
+                <select name="filter" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
                     <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
                     <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
                     <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
@@ -19,16 +19,18 @@
                 </select>
             </div>
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 focus:ring-primary-500 focus:border-primary-500">
+                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
             </div>
             <div>
-                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors duration-200">
-                    <span class="material-icons-round align-middle mr-2">filter_list</span>
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-200">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
                     Apply Filter
                 </button>
             </div>
@@ -37,78 +39,78 @@
 
     <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-primary-100 dark:bg-primary-900">
-                    <span class="material-icons-round text-primary-600 dark:text-primary-400">shopping_cart</span>
+                <div class="p-3 rounded-full bg-primary-100">
+                    <span class="material-icons-round text-primary-600">shopping_cart</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Orders</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">{{ total_sales_count }}</p>
+                    <p class="text-sm text-gray-600">Total Orders</p>
+                    <p class="text-2xl font-semibold text-gray-800">{{ total_sales_count }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900">
-                    <span class="material-icons-round text-green-600 dark:text-green-400">attach_money</span>
+                <div class="p-3 rounded-full bg-green-100">
+                    <span class="material-icons-round text-green-600">attach_money</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Total Sales</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">₹{{ total_sales_amount|floatformat:2 }}</p>
+                    <p class="text-sm text-gray-600">Total Sales</p>
+                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_sales_amount|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100 dark:bg-red-900">
-                    <span class="material-icons-round text-red-600 dark:text-red-400">discount</span>
+                <div class="p-3 rounded-full bg-red-100">
+                    <span class="material-icons-round text-red-600">discount</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Product Discounts</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">₹{{ total_product_discount|floatformat:2 }}</p>
+                    <p class="text-sm text-gray-600">Product Discounts</p>
+                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_product_discount|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-orange-100 dark:bg-orange-900">
-                    <span class="material-icons-round text-orange-600 dark:text-orange-400">local_offer</span>
+                <div class="p-3 rounded-full bg-orange-100">
+                    <span class="material-icons-round text-orange-600">local_offer</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Coupon Discounts</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">₹{{ total_coupon_discount|floatformat:2 }}</p>
+                    <p class="text-sm text-gray-600">Coupon Discounts</p>
+                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_coupon_discount|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900">
-                    <span class="material-icons-round text-purple-600 dark:text-purple-400">local_shipping</span>
+                <div class="p-3 rounded-full bg-purple-100">
+                    <span class="material-icons-round text-purple-600">local_shipping</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Shipping Costs</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">₹{{ total_shipping|floatformat:2 }}</p>
+                    <p class="text-sm text-gray-600">Shipping Costs</p>
+                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_shipping|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900">
-                    <span class="material-icons-round text-blue-600 dark:text-blue-400">savings</span>
+                <div class="p-3 rounded-full bg-blue-100">
+                    <span class="material-icons-round text-blue-600">savings</span>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">Net Sales</p>
-                    <p class="text-2xl font-semibold text-gray-800 dark:text-gray-200">₹{{ net_sales|floatformat:2 }}</p>
+                    <p class="text-sm text-gray-600">Net Sales</p>
+                    <p class="text-2xl font-semibold text-gray-800">₹{{ net_sales|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Orders Table and Download Buttons -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+    <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">Order Details</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Order Details</h3>
             <div class="space-x-3">
                 <a href="{% url 'download_pdf' %}?start_date={{ start_date|date:'Y-m-d' }}&end_date={{ end_date|date:'Y-m-d' }}" 
                    class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200">
@@ -124,8 +126,8 @@
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-700 dark:text-gray-300">
-                <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+            <table class="w-full text-sm text-left text-gray-700">
+                <thead class="text-xs uppercase bg-gray-100 text-gray-600">
                     <tr>
                         <th class="px-6 py-3">Order ID</th>
                         <th class="px-6 py-3">Date</th>
@@ -138,7 +140,7 @@
                 </thead>
                 <tbody>
                     {% for order in orders %}
-                    <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <tr class="border-b hover:bg-gray-50">
                         <td class="px-6 py-4">{{ order.order_id }}</td>
                         <td class="px-6 py-4">{{ order.order_date|date:"Y-m-d" }}</td>
                         <td class="px-6 py-4">₹{{ order.subtotal|floatformat:2 }}</td>
@@ -149,7 +151,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">No orders found for this period</td>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No orders found for this period</td>
                     </tr>
                     {% endfor %}
                 </tbody>

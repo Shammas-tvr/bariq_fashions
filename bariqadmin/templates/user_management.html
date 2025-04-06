@@ -6,29 +6,29 @@
 
 <div class="container mx-auto px-4">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold dark:text-white">Users ({{ total_users }})</h2>
+        <h2 class="text-2xl font-bold">Users ({{ total_users }})</h2>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">ID</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Username</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date of Joining</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date of Joining</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                <tbody class="bg-white divide-y divide-gray-200">
                     {% for user in users %}
                     <tr id="userRow-{{ user.id }}" data-user-id="{{ user.id }}">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.id }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.username }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{{ user.date_of_joining }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.id }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.date_of_joining }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="status-badge px-3 py-1 rounded-full text-sm {% if user.status == 'active' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
                                 {{ user.status|title }}
@@ -44,7 +44,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500 dark:text-gray-400">
+                        <td colspan="6" class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
                             No users found.
                         </td>
                     </tr>
@@ -56,15 +56,15 @@
 
     <div class="mt-4 flex justify-center space-x-1">
         {% if users.has_previous %}
-            <a href="?page=1" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-l-lg hover:bg-gray-100 dark:hover:bg-gray-700">First</a>
-            <a href="?page={{ users.previous_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Previous</a>
+            <a href="?page=1" class="px-3 py-2 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100">First</a>
+            <a href="?page={{ users.previous_page_number }}" class="px-3 py-2 bg-white border border-gray-300 hover:bg-gray-100">Previous</a>
         {% endif %}
-        <span class="px-3 py-2 bg-blue-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+        <span class="px-3 py-2 bg-blue-50 border border-gray-300">
             Page {{ users.number }} of {{ users.paginator.num_pages }}
         </span>
         {% if users.has_next %}
-            <a href="?page={{ users.next_page_number }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700">Next</a>
-            <a href="?page={{ users.paginator.num_pages }}" class="px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-r-lg hover:bg-gray-100 dark:hover:bg-gray-700">Last</a>
+            <a href="?page={{ users.next_page_number }}" class="px-3 py-2 bg-white border border-gray-300 hover:bg-gray-100">Next</a>
+            <a href="?page={{ users.paginator.num_pages }}" class="px-3 py-2 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100">Last</a>
         {% endif %}
     </div>
 </div>

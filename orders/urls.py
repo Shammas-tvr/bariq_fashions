@@ -22,7 +22,6 @@ urlpatterns = [
     # order detail in admin side
     path('admin-order/<str:order_id>/', views.admin_order_detail, name='admin_order_detail'),
     path('my-orders/', views.admin_order_list, name='order-list'),
-    path('update-status/<str:order_id>/',views.update_order_status, name='update_order_status'),
     path('order/<str:order_id>/item/<int:item_id>/update-status/', views.admin_update_order_item_status, name='update_order_item_status'),
 
     # coupons
@@ -30,6 +29,9 @@ urlpatterns = [
     path('coupon/toggle/<int:coupon_id>/', views.toggle_coupon_status, name='toggle_coupon_status'),
     path('coupon/create/', views.create_coupon, name='create_coupon'),
     path('coupon-list/', views.coupon_list, name='coupon_list'),
+
+    #invoice
+    path('order-invoice/<str:order_id>/', views.admin_invoice, name='invoice'),
 
 
 

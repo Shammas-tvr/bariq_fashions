@@ -265,7 +265,7 @@ def order_tracking(request, order_id):
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------#
-
+                            #address section #
 
 @login_required
 def address_list(request):
@@ -313,11 +313,7 @@ def profile_delete_address(request,address_id):
         address.delete()
     return redirect('address_list')
 
-@login_required
-def delete_address(request, address_id):
-    address = get_object_or_404(Address, id=address_id, user=request.user)
-    address.delete()
-    return redirect('address_list')
+
 
 
 
@@ -355,4 +351,7 @@ def ajax_search(request):
 
 
 
-
+@login_required
+def user_invoice(request,order_id):
+    order=get_object_or_404(Order,order_id=order_id,user=request.user)
+    return render(request,'user_invoice.html',{'order':order})
