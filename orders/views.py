@@ -1,5 +1,5 @@
 from django.shortcuts import render,get_object_or_404,redirect
-from cart.models import Cart,CartItem
+from cart.models import Cart,CartItem,Wallet,WalletTransaction
 from .models import ShippingAddress,Order,OrderItem,Address,Coupon,CouponUsage
 from .forms import AddressForm,CouponForm
 from django.http import JsonResponse
@@ -721,38 +721,89 @@ def admin_order_detail(request, order_id):
 
 @staff_member_required
 def admin_update_order_item_status(request, order_id, item_id):
-    order = get_object_or_404(Order, order_id=order_id) 
-    order_item = get_object_or_404(OrderItem, id=item_id) 
-
+    order = get_object_or_404(Order, order_id=order_id)
+    order_item = get_object_or_404(OrderItem, id=item_id)
+    
     if request.method == "POST":
         new_status = request.POST.get("status")
-
         if not new_status:
             messages.error(request, "No status provided.")
             return redirect('admin_order_detail', order_id=order.order_id)
-
-        all_items = order.items.all() 
-
+        
+        all_items = order.items.all()
         all_cancelled = all(item.status == 'cancelled' for item in all_items)
-
+        
         if all_cancelled:
             messages.error(request, "This order is fully cancelled. You cannot update item statuses.")
             return redirect('admin_order_detail', order_id=order.order_id)
-
+        
         if order_item.status == 'cancelled' and new_status == 'delivered':
             messages.error(request, "Cannot deliver an item that has already been cancelled.")
             return redirect('admin_order_detail', order_id=order.order_id)
-
+        
         if order_item.status == 'delivered' and new_status == 'cancelled':
-            messages.error(request, "Cannot cancel an item that has already been deliverd .")
+            messages.error(request, "Cannot cancel an item that has already been delivered.")
             return redirect('admin_order_detail', order_id=order.order_id)
+        
+        # Handle refund logic
+        if new_status == 'refunded':
+            try:
+                user = order.user
+                
+                # Start with the base price minus item-specific discount
+                # The order_item.discount is the product discount already applied
+                item_subtotal = order_item.price * order_item.quantity  # Original price
+                item_with_discount = item_subtotal - order_item.discount  # After product discount
+                
+                # Calculate the coupon discount specifically for this item
+                coupon_discount_for_item = 0
+                if order.coupon and order.coupon_discount > 0:
+                    if order.coupon.is_percentage:
+                        # For percentage coupons, recalculate the percentage on this item
+                        coupon_discount_for_item = item_with_discount * (order.coupon.discount / 100)
+                        
+                        # Check if there's a max_discount constraint
+                        if order.coupon.max_discount is not None:
+                            coupon_discount_for_item = min(coupon_discount_for_item, order.coupon.max_discount)
+                    else:
+                        # For fixed coupons, distribute proportionally
+                        total_order_value = sum((item.price * item.quantity) - item.discount for item in all_items)
+                        if total_order_value > 0:  # Avoid division by zero
+                            item_proportion = item_with_discount / total_order_value
+                            coupon_discount_for_item = order.coupon_discount * item_proportion
+                
+                # Calculate final refund amount
+                refund_amount = item_with_discount - coupon_discount_for_item
+                
+                # Ensure refund amount is not negative
+                refund_amount = max(refund_amount, 0)
+                
+                # Create wallet transaction for the refund
+                wallet, created = Wallet.objects.get_or_create(user=user)
+                wallet.balance += refund_amount
+                wallet.save()
+                
+                # Create wallet transaction record
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    amount=refund_amount,
+                    transaction_type='credit',
+                    order=order,
+                    description=f'Refund for order item #{order_item.id} in order #{order.order_id}'
+                )
+                
+                messages.success(request, f"Item refunded and ₹{refund_amount:.2f} added to customer's wallet.")
+            except Exception as e:
+                messages.error(request, f"Error processing refund: {str(e)}")
+                return redirect('admin_order_detail', order_id=order.order_id)
         
         order_item.status = new_status
         order_item.save()
-        messages.success(request, f"Item status updated to {new_status.capitalize()}.")
-
-    return redirect('admin_order_detail', order_id=order.order_id)
-
+        
+        if new_status != 'refunded':  # We've already added a success message for refunds
+            messages.success(request, f"Item status updated to {new_status.capitalize()}.")
+        
+        return redirect('admin_order_detail', order_id=order.order_id)
 
 
 #--------------------------------------------------------------------------------------------------------------------------------#

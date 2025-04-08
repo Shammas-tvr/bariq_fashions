@@ -3,245 +3,249 @@
 {% block title %}Admin Dashboard - E-commerce{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-3 py-4">
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">Dashboard</h2>
-        <div class="d-flex align-items-center">
-            <label for="timeFilter" class="me-2 text-muted">View:</label>
-            <select id="timeFilter" class="form-select border-0 shadow-sm" onchange="location = this.value;">
-                <option value="?filter=weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
-                <option value="?filter=monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-                <option value="?filter=yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
-            </select>
-        </div>
+<div class="space-y-8 px-4 py-6">
+    <!-- Filter Card -->
+    <div class="bg-white rounded-xl shadow p-6 border border-gray-100">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Dashboard Filters</h2>
+        <form method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
+                <select name="filter" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2" onchange="location = this.value;">
+                    <option value="?filter=daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+                    <option value="?filter=weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                    <option value="?filter=monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                    <option value="?filter=yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+            </div>
+            <div class="flex-1">
+                <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+            </div>
+        </form>
     </div>
 
-    <!-- Summary Stats -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-2">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary bg-opacity-10 p-2 rounded me-3">
-                            <i class="fas fa-shopping-bag fa-lg text-primary"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-1 small">Total Orders</p>
-                            <h4 class="fw-bold mb-0">{{ total_orders }}</h4>
-                        </div>
-                    </div>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow p-6 border border-gray-100 transition-all hover:shadow-md">
+            <div class="flex items-center">
+                <div class="p-4 rounded-full bg-primary-100">
+                    <i class="fas fa-shopping-cart text-primary-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                    <p class="text-3xl font-bold text-gray-800">{{ total_orders }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-2">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-success bg-opacity-10 p-2 rounded me-3">
-                            <i class="fas fa-rupee-sign fa-lg text-success"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-1 small">Total Sales</p>
-                            <h4 class="fw-bold mb-0">₹{{ total_sales|floatformat:2 }}</h4>
-                        </div>
-                    </div>
+        <div class="bg-white rounded-xl shadow p-6 border border-gray-100 transition-all hover:shadow-md">
+            <div class="flex items-center">
+                <div class="p-4 rounded-full bg-green-100">
+                    <i class="fas fa-money-bill-wave text-green-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Sales</p>
+                    <p class="text-3xl font-bold text-gray-800">₹{{ total_sales|floatformat:2 }}</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-2">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-info bg-opacity-10 p-2 rounded me-3">
-                            <i class="fas fa-user-friends fa-lg text-info"></i>
-                        </div>
-                        <div>
-                            <p class="text-muted mb-1 small">Total Customers</p>
-                            <h4 class="fw-bold mb-0">{{ total_customers }}</h4>
-                        </div>
-                    </div>
+        <div class="bg-white rounded-xl shadow p-6 border border-gray-100 transition-all hover:shadow-md">
+            <div class="flex items-center">
+                <div class="p-4 rounded-full bg-blue-100">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-500">Total Customers</p>
+                    <p class="text-3xl font-bold text-gray-800">{{ total_customers }}</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Sales Chart -->
-    <div class="card border-0 shadow-sm rounded-2 mb-4">
-        <div class="card-header bg-white border-bottom py-3">
-            <h5 class="fw-semibold mb-0">Sales Overview</h5>
+    <div class="bg-white rounded-xl shadow p-6 border border-gray-100">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold text-gray-800">Sales Overview</h3>
+            <div class="text-sm text-gray-500">
+                <i class="fas fa-info-circle mr-1"></i> {{ filter_type|title }} View
+            </div>
         </div>
-        <div class="card-body p-4">
-            <canvas id="salesChart" height="100"></canvas>
+        <div class="h-80">
+            <canvas id="salesChart"></canvas>
         </div>
     </div>
 
     <!-- Top Performers -->
-    <div class="row g-3">
-        <!-- Top Products -->
-        <div class="col-md-4">
-            <div class="card border-0A shadow-sm rounded-2 h-100">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="fw-semibold mb-0">Top Products</h5>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for product in best_products %}
-                            <li class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center">
-                                <span class="text-dark fw-medium text-truncate" style="max-width: 200px;" title="{{ product.product_variant__product__name }}">
-                                    {{ product.product_variant__product__name }}
-                                </span>
-                                <span class="badge bg-primary bg-opacity-75 text-white rounded-pill px-2">{{ product.total_quantity }}</span>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item border-0 py-3 text-center text-muted">No data available</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+            <div class="p-6 bg-gradient-to-r from-yellow-50 to-white border-b">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-star text-yellow-500 mr-2"></i> 
+                    Top Products
+                </h3>
             </div>
+            <ul class="divide-y divide-gray-100">
+                {% for product in best_products %}
+                    <li class="p-4 hover:bg-gray-50 transition-colors duration-200">
+                        <span class="text-gray-700 font-medium block truncate" title="{{ product.product_variant__product__name }}">
+                            {{ product.product_variant__product__name }}
+                        </span>
+                    </li>
+                {% empty %}
+                    <li class="p-6 text-center text-gray-500">
+                        <i class="fas fa-box-open text-gray-300 text-3xl mb-2"></i>
+                        <p>No product data available</p>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
 
-        <!-- Top Categories -->
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-2 h-100">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="fw-semibold mb-0">Top Categories</h5>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for category in best_categories %}
-                            <li class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center">
-                                <span class="text-dark fw-medium text-truncate" style="max-width: 200px;" title="{{ category.product_variant__product__category__name }}">
-                                    {{ category.product_variant__product__category__name }}
-                                </span>
-                                <span class="badge bg-success bg-opacity-75 text-white rounded-pill px-2">{{ category.total_quantity }}</span>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item border-0 py-3 text-center text-muted">No data available</li>
-                        {% endfor %}
-                    </ul>
-                </div>
+        <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+            <div class="p-6 bg-gradient-to-r from-green-50 to-white border-b">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-layer-group text-green-500 mr-2"></i>
+                    Top Categories
+                </h3>
             </div>
-        </div>
-
-        <!-- Top Brands -->
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-2 h-100">
-                <div class="card-header bg-white border-bottom py-3">
-                    <h5 class="fw-semibold mb-0">Top Brands</h5>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                        {% for brand in best_brands %}
-                            <li class="list-group-item border-0 py-3 d-flex justify-content-between align-items-center">
-                                <span class="text-dark fw-medium text-truncate" style="max-width: 200px;" title="{{ brand.product_variant__product__brand }}">
-                                    {{ brand.product_variant__product__brand }}
-                                </span>
-                                <span class="badge bg-info bg-opacity-75 text-white rounded-pill px-2">{{ brand.total_quantity }}</span>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item border-0 py-3 text-center text-muted">No data available</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
+            <ul class="divide-y divide-gray-100">
+                {% for category in best_categories %}
+                    <li class="p-4 hover:bg-gray-50 transition-colors duration-200">
+                        <span class="text-gray-700 font-medium block truncate" title="{{ category.product_variant__product__category__name }}">
+                            {{ category.product_variant__product__category__name }}
+                        </span>
+                    </li>
+                {% empty %}
+                    <li class="p-6 text-center text-gray-500">
+                        <i class="fas fa-folder-open text-gray-300 text-3xl mb-2"></i>
+                        <p>No category data available</p>
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_css %}
+<!-- Add Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
-    .card {
-        background: #fff;
-        transition: box-shadow 0.2s ease;
-    }
-    .card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08) !important;
-    }
-    .form-select {
-        background-color: #f8f9fa;
-        padding: 0.375rem 1.75rem 0.375rem 0.75rem;
-    }
-    .bg-opacity-10 {
-        background-color: rgba(var(--bs-color-rgb), 0.1);
-    }
-    .list-group-item {
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
+    .bg-primary-100 { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-green-100 { background-color: rgba(22, 163, 74, 0.1); }
+    .bg-blue-100 { background-color: rgba(37, 99, 235, 0.1); }
+    .bg-yellow-50 { background-color: rgba(250, 204, 21, 0.05); }
+    .bg-green-50 { background-color: rgba(22, 163, 74, 0.05); }
+    .text-primary-600 { color: #0d6efd; }
+    .text-green-600 { color: #16a34a; }
+    .text-blue-600 { color: #2563eb; }
+    .text-yellow-500 { color: #eab308; }
+    .text-green-500 { color: #16a34a; }
+    .bg-primary-600 { background-color: #0d6efd; }
+    .bg-gray-50 { background-color: #f9fafb; }
+    .border-gray-100 { border-color: #f3f4f6; }
+    .text-gray-300 { color: #d1d5db; }
+    .text-gray-500 { color: #6b7280; }
+    .text-gray-700 { color: #374151; }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('salesChart').getContext('2d');
-    const salesChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [{% for sale in sales_data %}'{{ sale.order_date__date }}',{% endfor %}],
-            datasets: [{
-                label: 'Sales (₹)',
-                data: [{% for sale in sales_data %}{{ sale.total_sales }},{% endfor %}],
-                borderColor: '#0d6efd',
-                backgroundColor: 'rgba(13, 110, 253, 0.05)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#0d6efd',
-                pointBorderColor: '#fff',
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        font: {
-                            size: 13
-                        }
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `₹${context.parsed.y.toFixed(2)}`;
-                        }
-                    }
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const filterType = '{{ filter_type }}';
+        
+        // Configure labels based on filter type
+        const labels = [{% for sale in sales_data %}
+            {% if filter_type == 'yearly' %}
+                '{{ sale.order_date__date|stringformat:"s" }}',
+            {% elif filter_type == 'daily' %}
+                '{{ sale.order_date__date|stringformat:"s" }}:00',
+            {% else %}
+                '{{ sale.order_date__date }}',
+            {% endif %}
+        {% endfor %}];
+        
+        const formattedLabels = labels.map(label => {
+            if (filterType === 'yearly') {
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const monthNum = parseInt(label) - 1;
+                return monthNames[monthNum >= 0 && monthNum < 12 ? monthNum : 0];
+            } else if (filterType === 'daily') {
+                const hour = parseInt(label.split(':')[0]);
+                return hour < 12 ? `${hour === 0 ? 12 : hour}AM` : `${hour === 12 ? 12 : hour - 12}PM`;
+            }
+            return label;
+        });
+        
+        const salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: formattedLabels,
+                datasets: [{
+                    label: 'Sales (₹)',
+                    data: [{% for sale in sales_data %}{{ sale.total_sales|default:0 }},{% endfor %}],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.05)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#0d6efd',
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: '#e9ecef',
-                        borderDash: [2, 4]
-                    },
-                    title: {
-                        display: true,
-                        text: 'Sales (₹)',
-                        font: {
-                            size: 12
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#0d6efd',
+                        bodyColor: '#333',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `₹${context.parsed.y.toFixed(2)}`;
+                            }
                         }
                     }
                 },
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    title: {
-                        display: true,
-                        text: 'Date',
-                        font: {
-                            size: 12
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value;
+                            }
                         }
+                    },
+                    x: { 
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' } 
                     }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
                 }
             }
-        }
+        });
     });
 </script>
 {% endblock %}

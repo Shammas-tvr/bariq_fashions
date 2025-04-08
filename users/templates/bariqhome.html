@@ -33,7 +33,7 @@
         --radius-full: 9999px;
         --transition: all 0.3s ease;
         --container-width: 1400px;
-        --hover-blue: #87CEEB;
+        --hover-blue: #87ceeb;
     }
 
     * {
@@ -387,10 +387,14 @@
     }
 
     .category-content h3 {
-        font-size: 1.2rem;
-        color: var(--primary-color);
+        font-size: 1.6rem;
+        color: #b9eef6; /* Changed to light blue */
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         transition: all 0.3s ease;
+        white-space: nowrap; /* Ensures single line */
+        overflow: hidden; /* Hides overflow text */
+        text-overflow: ellipsis; /* Adds ellipsis if text is too long */
+        max-width: 160px; /* Limits width to fit within card */
     }
 
     .category-card:hover .category-content h3 {
@@ -831,21 +835,21 @@
     <div class="container">
         <div class="promo-grid">
             <div class="promo-item">
-                <img src="{% static 'images/new_arrival.jpeg' %}" alt="New Arrivals">
+                <img src="{% static 'images/new_arrivel.jpg' %}" alt="New Arrivals">
                 <div class="promo-overlay">
                     <h3 class="promo-title">New Arrivals</h3>
                     <a href="#" class="btn btn-primary">Shop Now</a>
                 </div>
             </div>
             <div class="promo-item">
-                <img src="{% static 'images/promo2.jpg' %}" alt="Best Sellers">
+                <img src="{% static 'images/best_selling.jpg' %}" alt="Best Sellers">
                 <div class="promo-overlay">
                     <h3 class="promo-title">Best Sellers</h3>
                     <a href="#" class="btn btn-primary">Discover</a>
                 </div>
             </div>
             <div class="promo-item">
-                <img src="{% static 'images/clearense_sale.jpg' %}" alt="Clearance Sale">
+                <img src="{% static 'images/clearence_sale.jpeg' %}" alt="Clearance Sale">
                 <div class="promo-overlay">
                     <h3 class="promo-title">Clearance Sale</h3>
                     <a href="#" class="btn btn-primary">Grab Deals</a>

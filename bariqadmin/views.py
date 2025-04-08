@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db.models import Sum
 from datetime import timedelta
+from django.db.models.functions import ExtractHour, ExtractMonth
 from orders.models import Order, OrderItem
 from django.utils import timezone
 
@@ -52,36 +53,86 @@ def is_admin(User):
 
 #_______________________________________________________________________________________________________________________________#
 def Admin_Dashboard(request):
-    # Get time filter from request (default: this month)
+    # Get time filter and date range from request
     filter_type = request.GET.get('filter', 'monthly')
-
+    
+    # Get custom date range if provided
+    start_date_param = request.GET.get('start_date')
+    end_date_param = request.GET.get('end_date')
+    
     today = timezone.now()  # Use timezone-aware datetime
-    if filter_type == 'yearly':
-        start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
-    elif filter_type == 'weekly':
-        start_date = today - timedelta(days=today.weekday())
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-    else:  # Monthly (default)
-        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-
-    # Filtered Orders
-    orders = Order.objects.filter(order_date__gte=start_date)
+    
+    # Set default dates based on filter type
+    if start_date_param and end_date_param:
+        # Convert string dates to datetime objects
+        try:
+            start_date = timezone.make_aware(datetime.strptime(start_date_param, '%Y-%m-%d'))
+            end_date = timezone.make_aware(datetime.strptime(end_date_param, '%Y-%m-%d'))
+            # Add time to include the entire end day
+            end_date = end_date.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            # Fallback to default dates if parsing fails
+            start_date, end_date = get_default_dates(filter_type, today)
+    else:
+        # Use filter_type to determine date range
+        if filter_type == 'daily':
+            # Fixed: For daily view, show just today's data
+            start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+        elif filter_type == 'weekly':
+            # Get start of the current week (Monday)
+            start_date = today - timedelta(days=today.weekday())
+            start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+            end_date = today
+        elif filter_type == 'yearly':
+            start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            end_date = today
+        else:  # Monthly (default)
+            start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            end_date = today
+    
+    # Filtered Orders with proper date range
+    orders = Order.objects.filter(order_date__gte=start_date, order_date__lte=end_date)
 
     # Summary Stats (calculated from filtered orders)
     total_orders = orders.count()
     total_sales = orders.aggregate(total=Sum("total_amount"))["total"] or 0
     total_customers = orders.values("user").distinct().count()
 
-    # Sales Chart Data
-    sales_data = (
-        orders.values("order_date__date")
-        .annotate(total_sales=Sum("total_amount"))
-        .order_by("order_date__date")
-    )
+    # Sales Chart Data with proper grouping based on filter type
+    if filter_type == 'daily':
+        # For daily view, group by hour
+        sales_data = (
+            orders.annotate(
+                hour=ExtractHour('order_date')
+            ).values('hour')
+            .annotate(
+                order_date__date=F('hour'),
+                total_sales=Sum("total_amount")
+            ).order_by("hour")
+        )
+    elif filter_type == 'yearly':
+        # For yearly view, group by month
+        sales_data = (
+            orders.annotate(
+                month=ExtractMonth('order_date')
+            ).values('month')
+            .annotate(
+                order_date__date=F('month'),
+                total_sales=Sum("total_amount")
+            ).order_by("month")
+        )
+    else:
+        # For weekly and monthly, group by date
+        sales_data = (
+            orders.values("order_date__date")
+            .annotate(total_sales=Sum("total_amount"))
+            .order_by("order_date__date")
+        )
 
     # Best Selling Products
     best_products = (
-        OrderItem.objects.filter(order__order_date__gte=start_date)
+        OrderItem.objects.filter(order__order_date__gte=start_date, order__order_date__lte=end_date)
         .values("product_variant__product__name")
         .annotate(total_quantity=Sum("quantity"))
         .order_by("-total_quantity")[:5]
@@ -89,7 +140,7 @@ def Admin_Dashboard(request):
 
     # Best Selling Categories
     best_categories = (
-        OrderItem.objects.filter(order__order_date__gte=start_date)
+        OrderItem.objects.filter(order__order_date__gte=start_date, order__order_date__lte=end_date)
         .values("product_variant__product__category__name")
         .annotate(total_quantity=Sum("quantity"))
         .order_by("-total_quantity")[:5]
@@ -97,7 +148,7 @@ def Admin_Dashboard(request):
 
     # Best Selling Brands
     best_brands = (
-        OrderItem.objects.filter(order__order_date__gte=start_date)
+        OrderItem.objects.filter(order__order_date__gte=start_date, order__order_date__lte=end_date)
         .values("product_variant__product__brand")
         .annotate(total_quantity=Sum("quantity"))
         .order_by("-total_quantity")[:5]
@@ -111,9 +162,29 @@ def Admin_Dashboard(request):
         "total_orders": total_orders,
         "total_sales": total_sales,
         "total_customers": total_customers,
-        "filter_type": filter_type
+        "filter_type": filter_type,
+        "start_date": start_date,
+        "end_date": end_date
     }
     return render(request, "admin-dashboard.html", context)
+
+def get_default_dates(filter_type, today):
+    """Helper function to get default date ranges based on filter type"""
+    if filter_type == 'daily':
+        start_date = today.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+    elif filter_type == 'weekly':
+        start_date = today - timedelta(days=today.weekday())
+        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+        end_date = today
+    elif filter_type == 'yearly':
+        start_date = today.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = today
+    else:  # Monthly (default)
+        start_date = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_date = today
+    
+    return start_date, end_date         
 
 
 

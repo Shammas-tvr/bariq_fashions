@@ -184,10 +184,10 @@
 
             <!-- Messages Section -->
             {% if messages %}
-                <div class="p-6">
+                <div class="p-6" id="messages-container">
                     {% for message in messages %}
                         {% if 'product' not in message.tags %}
-                            <div class="mb-4 p-4 text-sm {% if message.tags == 'success' %}text-green-700 bg-green-100{% elif message.tags == 'error' %}text-red-700 bg-red-100{% else %}text-blue-700 bg-blue-100{% endif %} rounded-lg" role="alert">
+                            <div class="mb-4 p-4 text-sm {% if message.tags == 'success' %}text-green-700 bg-green-100{% elif message.tags == 'error' %}text-red-700 bg-red-100{% else %}text-blue-700 bg-blue-100{% endif %} rounded-lg alert-message" role="alert">
                                 {{ message }}
                             </div>
                         {% endif %}
@@ -245,9 +245,23 @@
             });
         }
 
+        function setupMessagesAutoDismiss() {
+            const messages = document.querySelectorAll('.alert-message');
+            messages.forEach((message) => {
+                setTimeout(() => {
+                    message.style.transition = 'opacity 0.5s ease-out';
+                    message.style.opacity = '0';
+                    setTimeout(() => {
+                        message.remove();
+                    }, 500); // Wait for fade-out animation to complete
+                }, 5000); // 5 seconds
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             setupMobileMenu();
             setupUserMenu();
+            setupMessagesAutoDismiss();
         });
     </script>
     

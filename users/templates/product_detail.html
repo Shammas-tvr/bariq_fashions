@@ -2,490 +2,586 @@
 {% load static %}
 
 {% block content %}
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product Details</title>
-<style>
-    :root {
-        --primary-color: #4a6de5;
-        --secondary-color: #f8f9fa;
-        --accent-color: #ff6b6b;
-        --text-color: #343a40;
-        --light-gray: #e9ecef;
-        --dark-gray: #6c757d;
-        --white: #ffffff;
-        --shadow: 0 2px 10px rgba(0,0,0,0.1);
-        --border-radius: 8px;
-    }
+    <style>
+        :root {
+            --primary-color: #4a6de5;
+            --secondary-color: #f8f9fa;
+            --accent-color: #ff6b6b;
+            --text-color: #343a40;
+            --light-gray: #e9ecef;
+            --dark-gray: #6c757d;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
 
-    .cart-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: var(--primary-color);
-        color: var(--white);
-        padding: 12px 20px;
-        border-radius: var(--border-radius);
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: var(--shadow);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        z-index: 1000;
-    }
+        .cart-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
 
-    .cart-notification.show {
-        opacity: 1;
-    }
+        .cart-notification.show {
+            opacity: 1;
+        }
 
-    .cart-notification.error {
-        background: var(--accent-color);
-    }
+        .cart-notification.error {
+            background: var(--accent-color);
+        }
 
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-        font-family: Arial, sans-serif;
-        line-height: 1.6;
-        background: #f5f5f5;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
 
-    .container {
-        max-width: 1200px;
-        margin: 2rem auto;
-        padding: 0 20px;
-    }
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 20px;
+        }
 
-    .product-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        background: var(--white);
-        padding: 20px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-    }
+        .product-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
 
-    .product-images {
-        flex: 1 1 400px;
-        position: relative;
-    }
+        .product-images {
+            flex: 1 1 400px;
+            position: relative;
+        }
 
-    .image-container {
-        position: relative;
-        width: 100%;
-        height: 500px;
-        overflow: hidden;
-        cursor: zoom-in;
-    }
-
-    .main-image {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-        border-radius: var(--border-radius);
-        display: block;
-    }
-
-    .zoom-lens {
-        position: absolute;
-        width: 120px;
-        height: 120px;
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid var(--light-gray);
-        display: none;
-        pointer-events: none;
-        z-index: 10;
-    }
-
-    .zoom-result {
-        position: absolute;
-        top: 0;
-        left: 100%;
-        width: 400px;
-        height: 400px;
-        border: 1px solid var(--light-gray);
-        background-repeat: no-repeat;
-        display: none;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        z-index: 100;
-        margin-left: 20px;
-        background-color: var(--white);
-    }
-
-    .thumbnails {
-        display: flex;
-        gap: 10px;
-        margin-top: 15px;
-        justify-content: center;
-    }
-
-    .thumbnail {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        cursor: pointer;
-        border-radius: var(--border-radius);
-        transition: all 0.3s ease;
-        border: 1px solid var(--light-gray);
-    }
-
-    .thumbnail:hover {
-        border-color: var(--primary-color);
-    }
-
-    .product-info {
-        flex: 1 1 400px;
-        padding: 20px;
-    }
-
-    .product-title {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-bottom: 10px;
-    }
-
-    .product-rating {
-        color: #ffa500;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-
-    .product-category {
-        color: var(--dark-gray);
-        font-size: 14px;
-        margin-bottom: 15px;
-    }
-
-    .price-section {
-        margin: 15px 0;
-    }
-
-    .original-price {
-        font-size: 14px;
-        color: var(--dark-gray);
-        text-decoration: line-through;
-        margin-right: 5px;
-    }
-
-    .offer-price {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    .offer-details {
-        color: var(--accent-color);
-        font-size: 14px;
-        font-weight: 500;
-        margin-top: 5px;
-    }
-
-    .description {
-        color: var(--dark-gray);
-        margin: 15px 0;
-        font-size: 14px;
-    }
-
-    .delivery-info {
-        margin: 15px 0;
-        padding: 15px;
-        background: var(--secondary-color);
-        border-radius: var(--border-radius);
-        border: 1px solid var(--light-gray);
-    }
-
-    .delivery-info ul {
-        list-style: none;
-        color: var(--text-color);
-    }
-
-    .delivery-info li {
-        display: flex;
-        align-items: center;
-        margin: 10px 0;
-        font-size: 14px;
-    }
-
-    .delivery-info i {
-        margin-right: 10px;
-        color: var(--primary-color);
-    }
-
-    .highlight {
-        color: var(--primary-color);
-        font-weight: 500;
-    }
-
-    .color-variants {
-        margin: 15px 0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .color-swatch {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        border: 2px solid var(--light-gray);
-        cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-
-    .color-swatch:hover {
-        transform: scale(1.1);
-        border-color: var(--primary-color);
-    }
-
-    .color-swatch.active {
-        border-color: var(--primary-color);
-        transform: scale(1.15);
-        box-shadow: 0 0 5px rgba(74, 109, 229, 0.5);
-    }
-
-    .color-swatch::after {
-        content: attr(title);
-        position: absolute;
-        bottom: 100%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--dark-gray);
-        color: var(--white);
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s;
-        margin-bottom: 5px;
-    }
-
-    .color-swatch:hover::after {
-        opacity: 1;
-    }
-
-    .availability {
-        color: var(--dark-gray);
-        font-size: 14px;
-        margin: 15px 0;
-    }
-
-    .button-group {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        background-color: var(--primary-color);
-        color: var(--white);
-        text-decoration: none;
-        border-radius: var(--border-radius);
-        font-size: 14px;
-        font-weight: 500;
-        transition: background-color 0.2s;
-        border: none;
-        cursor: pointer;
-        width: 100%;
-        text-align: center;
-    }
-
-    .btn:hover:not(:disabled) {
-        background-color: #3a5bd0;
-    }
-
-    .btn:disabled {
-        background-color: var(--dark-gray);
-        cursor: not-allowed;
-        opacity: 0.7;
-    }
-
-    .wishlist {
-        background: var(--white);
-        border: 1px solid var(--light-gray);
-        color: var(--dark-gray);
-        padding: 8px;
-        transition: all 0.2s;
-    }
-
-    .wishlist:hover {
-        color: var(--accent-color);
-        border-color: var(--accent-color);
-    }
-
-    .wishlist.active {
-        color: var(--accent-color);
-        border-color: var(--accent-color);
-        background: #fff5f5;
-    }
-
-    .related-products {
-        margin-top: 30px;
-        background: var(--white);
-        padding: 20px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-    }
-
-    .related-products h2 {
-        font-size: 24px;
-        color: var(--text-color);
-        margin-bottom: 20px;
-    }
-
-    .related-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 25px;
-    }
-
-    .related-link {
-        text-decoration: none;
-        color: inherit;
-    }
-
-    .related-item {
-        background: var(--white);
-        border-radius: var(--border-radius);
-        overflow: hidden;
-        box-shadow: var(--shadow);
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-
-    .related-item:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .related-item img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        border-radius: var(--border-radius) var(--border-radius) 0 0;
-    }
-
-    .related-item .name {
-        font-size: 16px;
-        font-weight: 500;
-        color: var(--text-color);
-        margin: 10px 15px;
-    }
-
-    .related-item .rating {
-        color: #ffa500;
-        margin: 0 15px 10px;
-        font-size: 14px;
-    }
-
-    .related-item .description {
-        color: var(--dark-gray);
-        font-size: 14px;
-        margin: 0 15px 10px;
-        max-height: 3em;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .related-item .price {
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin: 0 15px 15px;
-    }
-
-    .related-item .original-price {
-        font-size: 14px;
-        margin-left: 5px;
-    }
-
-    .review-section {
-        margin-top: 30px;
-        background: var(--white);
-        padding: 20px;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-    }
-
-    .review-section h2 {
-        font-size: 24px;
-        color: var(--text-color);
-        margin-bottom: 20px;
-    }
-
-    .review-item {
-        border-bottom: 1px solid var(--light-gray);
-        padding: 15px 0;
-    }
-
-    .review-item:last-child {
-        border-bottom: none;
-    }
-
-    .review-rating {
-        color: #ffa500;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-
-    .review-text {
-        color: var(--dark-gray);
-        font-size: 14px;
-    }
-
-    .review-author {
-        font-weight: 500;
-        color: var(--text-color);
-        margin-top: 10px;
-        font-size: 14px;
-    }
-
-    @media (max-width: 768px) {
         .image-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            cursor: zoom-in;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+        }
+
+        .main-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: var(--border-radius);
+            display: block;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .image-container.zoomed::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .image-zoom-overlay {
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 400px;
             height: 400px;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: none;
+            z-index: 100;
+            margin-left: 20px;
+            background-color: var(--white);
         }
         
-        .product-title {
+        .zoomed-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            pointer-events: none;
+        }
+        
+        .mobile-zoom-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--white);
+            z-index: 1000;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .mobile-zoom-container {
+            width: 100%;
+            height: 100%;
+            overflow: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .mobile-zoomed-image {
+            width: 200%;
+            height: auto;
+        }
+        
+        .mobile-zoom-close {
+            position: absolute;
+ nolink-top: 15px;
+            right: 15px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .thumbnails {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            border: 1px solid var(--light-gray);
+        }
+
+        .thumbnail:hover {
+            border-color: var(--primary-color);
         }
         
-        .zoom-result {
-            display: none !important;
+        .thumbnail.active {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 5px rgba(74, 109, 229, 0.3);
+        }
+
+        .product-info {
+            flex: 1 1 400px;
+            padding: 20px;
+        }
+
+        .product-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .product-rating {
+            color: #ffa500;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .product-category {
+            color: var(--dark-gray);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .price-section {
+            margin: 15px 0;
+        }
+
+        .original-price {
+            font-size: 14px;
+            color: var(--dark-gray);
+            text-decoration: line-through;
+            margin-right: 5px;
+        }
+
+        .offer-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .offer-details {
+            color: var(--accent-color);
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .description {
+            color: var(--dark-gray);
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .delivery-info {
+            margin: 15px 0;
+            padding: 15px;
+            background: var(--secondary-color);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--light-gray);
+        }
+
+        .delivery-info ul {
+            list-style: none;
+            color: var(--text-color);
+        }
+
+        .delivery-info li {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+
+        .delivery-info i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        .highlight {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .color-variants {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-swatch {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--light-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+        }
+
+        .color-swatch.active {
+            border-color: var(--primary-color);
+            transform: scale(1.15);
+            box-shadow: 0 0 5px rgba(74, 109, 229, 0.5);
+        }
+
+        .color-swatch::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-gray);
+            color: var(--white);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            margin-bottom: 5px;
+        }
+
+        .color-swatch:hover::after {
+            opacity: 1;
+        }
+
+        .availability {
+            color: var(--dark-gray);
+            font-size: 14px;
+            margin: 15px 0;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #3838;
+        }
+
+        .btn:disabled {
+            background-color: var(--dark-gray);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .wishlist {
+            background: var(--white);
+            border: 1px solid var(--light-gray);
+            color: var(--dark-gray);
+            padding: 8px;
+            transition: all 0.2s;
+        }
+
+        .wishlist:hover {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .wishlist.active {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+            background: #fff5f5;
+        }
+
+        .related-products {
+            margin-top: 30px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .related-products h2 {
+            font-size: 24px;
+            color: var(--text-color);
+            margin-bottom: 20px;
         }
 
         .related-grid {
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
         }
-    }
-</style>
 
-<body>
+        .related-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .related-item {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .related-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .related-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .related-item .name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-color);
+            margin: 10px 15px;
+        }
+
+        .related-item .rating {
+            color: #ffa500;
+            margin: 0 15px 10px;
+            font-size: 14px;
+        }
+
+        .related-item .description {
+            color: var(--dark-gray);
+            font-size: 14px;
+            margin: 0 15px 10px;
+            max-height: 3em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .related-item .price {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0 15px 15px;
+        }
+
+        .related-item .original-price {
+            font-size: 14px;
+            margin-left: 5px;
+        }
+
+        .review-section {
+            margin-top: 30px;
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .review-section h2 {
+            font-size: 24px;
+            color: var(--text-color);
+            margin-bottom: 20px;
+        }
+
+        .review-item {
+            border-bottom: 1px solid var(--light-gray);
+            padding: 15px 0;
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-rating {
+            color: #ffa500;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .review-text {
+            color: var(--dark-gray);
+            font-size: 14px;
+        }
+
+        .review-author {
+            font-weight: 500;
+            color: var(--text-color);
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .zoom-hint {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            background-color: rgba(255,255,255,0.7);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        @media (max-width: 768px) {
+            .image-container {
+                height: 400px;
+            }
+            
+            .product-title {
+                font-size: 20px;
+            }
+            
+            .image-zoom-overlay {
+                display: none !important;
+            }
+
+            .related-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .image-container {
+                cursor: pointer;
+            }
+        }
+    </style>
+
     <div class="container">
         <div class="product-wrapper">
             <div class="product-images">
                 {% with first_variant=variants.first %}
-                    <div class="image-container">
-                        <img src="{{ first_variant.images.first.image.url }}" 
+                    <div class="image-container" id="imageContainer">
+                        <img src="{{ first_variant.images.first.image.url|default:'/static/images/placeholder.jpg' }}" 
                              alt="{{ first_variant.color }} Variant" 
                              class="main-image" 
                              id="mainImage">
-                        <div class="zoom-lens" id="zoomLens"></div>
-                        <div class="zoom-result" id="zoomResult"></div>
+                        <div class="zoom-hint">
+                            <i class="fas fa-search-plus"></i>
+                        </div>     
                     </div>
+                    
+                    <div class="image-zoom-overlay" id="zoomOverlay">
+                        <img src="{{ first_variant.images.first.image.url|default:'/static/images/placeholder.jpg' }}"
+                             alt="{{ first_variant.color }} Variant Zoomed"
+                             class="zoomed-image"
+                             id="zoomedImage">
+                    </div>
+                    
+                    <div class="mobile-zoom-view" id="mobileZoomView">
+                        <button class="mobile-zoom-close" id="mobileZoomClose">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="mobile-zoom-container">
+                            <img src="{{ first_variant.images.first.image.url|default:'/static/images/placeholder.jpg' }}"
+                                 alt="{{ first_variant.color }} Variant Mobile Zoom"
+                                 class="mobile-zoomed-image"
+                                 id="mobileZoomedImage">
+                        </div>
+                    </div>
+                    
                     {% if first_variant.images.all %}
                         <div class="thumbnails">
                             {% for image in first_variant.images.all %}
-                                <img src="{{ image.image.url }}" 
+                                <img src="{{ image.image.url|default:'/static/images/placeholder.jpg' }}" 
                                      alt="Thumbnail" 
-                                     class="thumbnail" 
+                                     class="thumbnail {% if forloop.first %}active{% endif %}" 
                                      onclick="changeImage(this)">
                             {% endfor %}
                         </div>
@@ -494,22 +590,21 @@
             </div>
             
             <div class="product-info">
-                <h1 class="product-title">{{ product.name }}</h1>
+                <h1 class="product-title">{{ product.name|default:'Product Name' }}</h1>
                 <div class="product-rating">★★★★☆ (4.5/5)</div>
-                <p class="product-category">Category: {{ product.category.name }}</p>
+                <p class="product-category">Category: {{ product.category.name|default:'Uncategorized' }}</p>
                 
                 <div class="price-section">
-                    <span class="original-price">₹{{ product.price|floatformat:2 }}</span>
+                    <span class="original-price">₹{{ product.price|floatformat:2|default:'0.00' }}</span>
                     {% if offer_name and discounted_price < product.price %}
-                        <span class="offer-price">₹{{ discounted_price|floatformat:2 }}</span>
+                        <span class="offer-price">₹{{ discounted_price|floatformat:2|default:product.price }}</span>
                         <div class="offer-details">{{ offer_name }} - {{ offer_percentage }}% OFF</div>
                     {% else %}
-                    <span class="offer-price">₹{{ product.offer_price|floatformat:2 }}</span>
-
+                        <span class="offer-price">₹{{ product.offer_price|default:product.price|floatformat:2 }}</span>
                     {% endif %}
                 </div>
 
-                <div class="description">{{ product.description }}</div>
+                <div class="description">{{ product.description|default:'No description available' }}</div>
 
                 <div class="delivery-info">
                     <ul>
@@ -523,38 +618,38 @@
                 <div class="color-variants">
                     {% for variant in variants %}
                         <span class="color-swatch {% if forloop.first %}active{% endif %}" 
-                              data-images="{% for image in variant.images.all %}{{ image.image.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
-                              data-price="{{ product.price }}"
+                              data-images="{% for image in variant.images.all %}{{ image.image.url|default:'/static/images/placeholder.jpg' }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                              data-price="{{ product.price|default:'0' }}"
                               data-offer-price="{{ discounted_price|default:product.price }}"
                               data-discounted-price="{{ discounted_price|default:product.price }}"
-                              data-size="{{ variant.size }}"
+                              data-size="{{ variant.size|default:'N/A' }}"
                               data-variant-id="{{ variant.id }}"
                               data-in-wishlist="{% if variant.in_wishlist %}true{% else %}false{% endif %}"
                               title="{{ variant.color }}"
                               onclick="switchVariant(this)"
-                              style="background-color: {{ variant.color }};"></span>
+                              style="background-color: {{ variant.color|default:'#000' }};"></span>
                     {% endfor %}
                 </div>
 
                 {% with first_variant=variants.first %}
-                    <p class="availability">Size: {{ first_variant.size }} | In Stock</p>
+                    <p class="availability">Size: {{ first_variant.size|default:'N/A' }} | In Stock</p>
                 {% endwith %}
 
                 <div class="button-group">
                     {% if variants.first %}
-                    <form class="add-to-cart-form" method="POST" 
-                          action="{% url 'add_to_cart' variant_id=variants.first.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn add-to-cart" 
-                                data-product-id="{{ product.id }}"
-                                data-variant-id="{{ variants.first.id }}">
-                            <i class="fas fa-shopping-cart"></i> Add to Cart
-                        </button>
-                    </form>
+                        <form class="add-to-cart-form" method="POST" 
+                              action="{% url 'add_to_cart' variant_id=variants.first.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn add-to-cart" 
+                                    data-product-id="{{ product.id }}"
+                                    data-variant-id="{{ variants.first.id }}">
+                                <i class="fas fa-shopping-cart"></i> Add to Cart
+                            </button>
+                        </form>
                     {% else %}
-                    <button class="btn" disabled>
-                        <i class="fas fa-times-circle"></i> Out of Stock
-                    </button>
+                        <button class="btn" disabled>
+                            <i class="fas fa-times-circle"></i> Out of Stock
+                        </button>
                     {% endif %}
                     <button class="btn wishlist {% if variants.first.in_wishlist %}active{% endif %}" 
                             data-product-id="{{ product.id }}"
@@ -579,15 +674,15 @@
                                 {% else %}
                                     <img src="{% static 'images/placeholder.jpg' %}" alt="No image available">
                                 {% endif %}
-                                <div class="name">{{ related_product.name }}</div>
+                                <div class="name">{{ related_product.name|default:'Related Product' }}</div>
                                 <div class="rating">★★★★☆ (4.5/5)</div>
                                 <div class="description">
-                                    {{ related_product.description|truncatewords:10|default:"No description available" }}
+                                    {{ related_product.description|truncatewords:10|default:'No description available' }}
                                 </div>
                                 <div class="price">
-                                    <span class="original-price">₹{{ related_product.price }}</span>
+                                    <span class="original-price">₹{{ related_product.price|default:'0.00' }}</span>
                                     {% if related_data.discounted_price < related_product.price %}
-                                        <span class="offer-price">₹{{ related_data.discounted_price|floatformat:2 }}</span>
+                                        <span class="offer-price">₹{{ related_data.discounted_price|floatformat:2|default:related_product.price }}</span>
                                     {% else %}
                                         <span class="offer-price">₹{{ related_product.offer_price|default:related_product.price|floatformat:2 }}</span>
                                     {% endif %}
@@ -604,9 +699,9 @@
             {% if reviews %}
                 {% for review in reviews %}
                     <div class="review-item">
-                        <div class="review-rating">★★★★☆ ({{ review.rating }}/5)</div>
-                        <p class="review-text">{{ review.text }}</p>
-                        <p class="review-author">- {{ review.user.username }}</p>
+                        <div class="review-rating">★★★★☆ ({{ review.rating|default:'N/A' }}/5)</div>
+                        <p class="review-text">{{ review.text|default:'No review text' }}</p>
+                        <p class="review-author">- {{ review.user.username|default:'Anonymous' }}</p>
                     </div>
                 {% endfor %}
             {% else %}
@@ -624,7 +719,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Cart functionality
             document.querySelectorAll('.add-to-cart-form').forEach(form => {
                 form.addEventListener('submit', async (e) => {
                     e.preventDefault();
@@ -635,7 +729,7 @@
                         const response = await fetch(form.action, {
                             method: 'POST',
                             headers: {
-                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '',
                             },
                             body: new FormData(form)
                         });
@@ -665,7 +759,6 @@
                 });
             });
 
-            // Wishlist functionality
             document.querySelectorAll('.wishlist').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -725,94 +818,92 @@
                 setTimeout(() => toast.remove(), 3000);
             }
 
-            // Zoom Functionality
+            const imageContainer = document.getElementById('imageContainer');
             const mainImage = document.getElementById('mainImage');
-            const zoomLens = document.getElementById('zoomLens');
-            const zoomResult = document.getElementById('zoomResult');
-            const imageContainer = document.querySelector('.image-container');
-            const zoomFactor = 2.5;
+            const zoomOverlay = document.getElementById('zoomOverlay');
+            const zoomedImage = document.getElementById('zoomedImage');
+            const mobileZoomView = document.getElementById('mobileZoomView');
+            const mobileZoomedImage = document.getElementById('mobileZoomedImage');
+            const mobileZoomClose = document.getElementById('mobileZoomClose');
+
+            const ZOOM_FACTOR = 2.5;
+            let isZooming = false;
+            const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
             function initializeZoom() {
-                // Remove previous event listeners to avoid duplicates
-                imageContainer.removeEventListener('mousemove', moveLens);
-                imageContainer.removeEventListener('mouseenter', showZoom);
-                imageContainer.removeEventListener('mouseleave', hideZoom);
+                zoomedImage.src = mainImage.src;
+                mobileZoomedImage.src = mainImage.src;
                 
-                // Set up the zoom result background
-                zoomResult.style.backgroundImage = `url('${mainImage.src}')`;
+                imageContainer.removeEventListener('mousemove', handleMouseMove);
+                imageContainer.removeEventListener('mouseenter', handleMouseEnter);
+                imageContainer.removeEventListener('mouseleave', handleMouseLeave);
+                imageContainer.removeEventListener('click', handleImageClick);
+                mobileZoomClose.removeEventListener('click', closeMobileZoom);
                 
-                // Calculate the natural dimensions of the image
-                const img = new Image();
-                img.src = mainImage.src;
-                
-                img.onload = function() {
-                    const imgWidth = img.naturalWidth;
-                    const imgHeight = img.naturalHeight;
-                    
-                    // Set the background size for zoom
-                    zoomResult.style.backgroundSize = `${imgWidth * zoomFactor}px ${imgHeight * zoomFactor}px`;
-                    
-                    // Add event listeners
-                    imageContainer.addEventListener('mousemove', moveLens);
-                    imageContainer.addEventListener('mouseenter', showZoom);
-                    imageContainer.addEventListener('mouseleave', hideZoom);
-                };
+                if (isTouchDevice) {
+                    imageContainer.addEventListener('click', handleImageClick);
+                    mobileZoomClose.addEventListener('click', closeMobileZoom);
+                } else {
+                    imageContainer.addEventListener('mouseenter', handleMouseEnter);
+                    imageContainer.addEventListener('mouseleave', handleMouseLeave);
+                    imageContainer.addEventListener('mousemove', handleMouseMove);
+                }
             }
 
-            function showZoom() {
-                if (window.innerWidth <= 768) return;
-                zoomLens.style.display = 'block';
-                zoomResult.style.display = 'block';
+            function handleMouseMove(e) {
+                if (!isZooming) return;
+                
+                const rect = imageContainer.getBoundingClientRect();
+                const xPos = (e.clientX - rect.left) / rect.width;
+                const yPos = (e.clientY - rect.top) / rect.height;
+                
+                const imgNaturalWidth = mainImage.naturalWidth || mainImage.width;
+                const imgNaturalHeight = mainImage.naturalHeight || mainImage.height;
+                
+                zoomedImage.style.width = (imgNaturalWidth * ZOOM_FACTOR) + 'px';
+                zoomedImage.style.height = (imgNaturalHeight * ZOOM_FACTOR) + 'px';
+                
+                const zoomedX = xPos * (imgNaturalWidth * ZOOM_FACTOR - zoomOverlay.offsetWidth);
+                const zoomedY = yPos * (imgNaturalHeight * ZOOM_FACTOR - zoomOverlay.offsetHeight);
+                
+                zoomedImage.style.left = -zoomedX + 'px';
+                zoomedImage.style.top = -zoomedY + 'px';
             }
 
-            function hideZoom() {
-                zoomLens.style.display = 'none';
-                zoomResult.style.display = 'none';
+            function handleMouseEnter() {
+                isZooming = true;
+                imageContainer.classList.add('zoomed');
+                zoomOverlay.style.display = 'block';
             }
 
-            function moveLens(e) {
-                e.preventDefault();
-                
-                // Get cursor position relative to the image container
-                const containerRect = imageContainer.getBoundingClientRect();
-                const x = e.clientX - containerRect.left;
-                const y = e.clientY - containerRect.top;
-                
-                // Calculate lens position (centered on cursor)
-                const lensWidth = zoomLens.offsetWidth;
-                const lensHeight = zoomLens.offsetHeight;
-                
-                let lensX = x - lensWidth / 2;
-                let lensY = y - lensHeight / 2;
-                
-                // Prevent lens from going outside the image container
-                lensX = Math.max(0, Math.min(lensX, containerRect.width - lensWidth));
-                lensY = Math.max(0, Math.min(lensY, containerRect.height - lensHeight));
-                
-                // Position the lens
-                zoomLens.style.left = `${lensX}px`;
-                zoomLens.style.top = `${lensY}px`;
-                
-                // Calculate the background position for the zoom result
-                const img = mainImage;
-                const imgRect = img.getBoundingClientRect();
-                
-                // Calculate the ratio between the displayed image and its natural size
-                const ratioX = img.naturalWidth / imgRect.width;
-                const ratioY = img.naturalHeight / imgRect.height;
-                
-                // Calculate the position in the original image
-                const bgX = (x - imgRect.left + containerRect.left) * ratioX * zoomFactor - zoomResult.offsetWidth / 2;
-                const bgY = (y - imgRect.top + containerRect.top) * ratioY * zoomFactor - zoomResult.offsetHeight / 2;
-                
-                // Set the background position
-                zoomResult.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+            function handleMouseLeave() {
+                isZooming = false;
+                imageContainer.classList.remove('zoomed');
+                zoomOverlay.style.display = 'none';
+            }
+
+            function handleImageClick() {
+                if (window.innerWidth <= 768) {
+                    mobileZoomView.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+
+            function closeMobileZoom() {
+                mobileZoomView.style.display = 'none';
+                document.body.style.overflow = '';
             }
 
             window.changeImage = function(element) {
                 mainImage.src = element.src;
+                
+                document.querySelectorAll('.thumbnail').forEach(thumb => {
+                    thumb.classList.remove('active');
+                });
+                element.classList.add('active');
+                
                 initializeZoom();
-            }
+            };
 
             window.switchVariant = function(element) {
                 document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
@@ -829,6 +920,7 @@
                             img.src = imageUrl;
                             img.alt = `Thumbnail ${index + 1}`;
                             img.className = 'thumbnail';
+                            if (index === 0) img.classList.add('active');
                             img.onclick = () => changeImage(img);
                             thumbnailsContainer.appendChild(img);
                         });
@@ -856,11 +948,16 @@
                         '<i class="fas fa-heart"></i> Remove from Wishlist' : 
                         '<i class="fas fa-heart"></i> Add to Wishlist';
                 }
-            }
+            };
 
-            // Initialize zoom functionality when page loads
             initializeZoom();
+
+            window.addEventListener('resize', function() {
+                if (mobileZoomView.style.display === 'block' && window.innerWidth > 768) {
+                    closeMobileZoom();
+                }
+                initializeZoom();
+            });
         });
     </script>
-</body>
 {% endblock %}
