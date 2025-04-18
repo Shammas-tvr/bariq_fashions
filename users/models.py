@@ -8,7 +8,7 @@ class CustomUser(AbstractUser):
     email=models.EmailField()
     username=models.CharField(max_length=150,unique=True)
     date_of_joining=models.DateTimeField(auto_created=True,null=True)
-    status=models.CharField(max_length=10,choices=[('Active','active'),('Blocked','blocked')],default='active')
+    is_blocked=models.BooleanField(default=False)
 
    
 

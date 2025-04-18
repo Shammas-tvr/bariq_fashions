@@ -28,17 +28,17 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.id }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.username }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.date_of_joining }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.date_of_joining|date:"Y-m-d H:i" }}</td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="status-badge px-3 py-1 rounded-full text-sm {% if user.status == 'active' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
-                                {{ user.status|title }}
+                            <span class="status-badge px-3 py-1 rounded-full text-sm {% if not user.is_blocked %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">
+                                {% if not user.is_blocked %}Active{% else %}Blocked{% endif %}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-3">
                             <button onclick="toggleStatus('{{ user.id }}')"
-                                    class="status-toggle px-4 py-2 rounded-md {% if user.status == 'active' %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}"
-                                    title="{% if user.status == 'active' %}Block{% else %}Unblock{% endif %}">
-                                {% if user.status == 'active' %}Block{% else %}Unblock{% endif %}
+                                    class="status-toggle px-4 py-2 rounded-md {% if not user.is_blocked %}bg-red-500 text-white{% else %}bg-green-500 text-white{% endif %}"
+                                    title="{% if not user.is_blocked %}Block{% else %}Unblock{% endif %}">
+                                {% if not user.is_blocked %}Block{% else %}Unblock{% endif %}
                             </button>
                         </td>
                     </tr>
@@ -90,21 +90,38 @@
                 console.log('Status toggled successfully for user ID:', userId);
                 const statusBadge = document.querySelector(`#userRow-${userId} .status-badge`);
                 const statusToggle = document.querySelector(`#userRow-${userId} .status-toggle`);
-                statusBadge.innerText = data.new_status.charAt(0).toUpperCase() + data.new_status.slice(1);
-                statusBadge.classList.toggle('bg-green-100', data.new_status === 'active');
-                statusBadge.classList.toggle('text-green-800', data.new_status === 'active');
-                statusBadge.classList.toggle('bg-red-100', data.new_status === 'blocked');
-                statusBadge.classList.toggle('text-red-800', data.new_status === 'blocked');
-                statusToggle.classList.toggle('bg-red-500', data.new_status === 'active');
-                statusToggle.classList.toggle('bg-green-500', data.new_status === 'blocked');
-                statusToggle.innerText = data.new_status === 'active' ? 'Block' : 'Unblock';
+                const isBlocked = data.is_blocked;
+
+                // Update status badge
+                statusBadge.innerText = isBlocked ? 'Blocked' : 'Active';
+                statusBadge.classList.toggle('bg-green-100', !isBlocked);
+                statusBadge.classList.toggle('text-green-800', !isBlocked);
+                statusBadge.classList.toggle('bg-red-100', isBlocked);
+                statusBadge.classList.toggle('text-red-800', isBlocked);
+
+                // Update toggle button
+                statusToggle.classList.toggle('bg-red-500', !isBlocked);
+                statusToggle.classList.toggle('bg-green-500', isBlocked);
+                statusToggle.innerText = isBlocked ? 'Unblock' : 'Block';
+                statusToggle.title = isBlocked ? 'Unblock' : 'Block';
             } else {
                 console.error('Failed to toggle status:', data);
+                showToast('Failed to toggle user status', 'bg-red-500');
             }
         })
         .catch(error => {
             console.error('Error toggling user status:', error);
+            showToast('Error toggling user status', 'bg-red-500');
         });
+    }
+
+    function showToast(message, bgColor) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${bgColor} transform transition-transform duration-300 translate-y-0`;
+        setTimeout(() => {
+            toast.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg text-white ${bgColor} transform transition-transform duration-300 translate-y-full`;
+        }, 3000);
     }
 </script>
 {% endblock %}

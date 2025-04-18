@@ -20,7 +20,7 @@ def add_product(request):
         price = request.POST.get('price')
         offer_price = request.POST.get('offer_price')
         category_id = request.POST.get('category')
-        brand=request.POST.get('brand_name')
+        brand=request.POST.get('brand')
 
         # Validate the data
         if not name or not price or not offer_price or not category_id:
@@ -43,7 +43,7 @@ def add_product(request):
             price=price,
             offer_price=offer_price,
             category=category,
-            Brand=brand
+            brand=brand
         )
         product.save()
 
@@ -68,6 +68,7 @@ def edit_product(request, product_id):
         price = request.POST.get('price')
         offer_price = request.POST.get('offer_price')
         category_id = request.POST.get('category')
+        brand=request.POST.get('brand')
 
         # Basic validation
         if not name:
@@ -100,6 +101,7 @@ def edit_product(request, product_id):
             product.price = price
             product.offer_price = offer_price
             product.category = category
+            product.brand=brand
             product.save()
             return redirect('product_list')
 

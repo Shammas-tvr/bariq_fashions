@@ -167,7 +167,7 @@ def resend_otp(request):
 
 #____________________________________________________________________________________________________________________________________#
 
-
+@login_required
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -196,7 +196,7 @@ def forgot_password(request):
 
     return render(request, 'forgot_password.html')
 
-
+@login_required
 def reset_password(request, email):
     if request.method == 'POST':
         new_password = request.POST.get('new_password')
@@ -221,7 +221,7 @@ def reset_password(request, email):
 
 
 #------------------------------------------------------------------------------------------------------------------------------------#
-
+@login_required
 def verify_reset_otp(request):
     if 'reset_otp_data' not in request.session:
         messages.error(request, 'Please request an OTP first.')
@@ -275,7 +275,8 @@ def Facebook_Athen(request):
     return render(request, 'facebook.html')
 
 
-
+def blocked_user_view(request):
+    return render(request,'blocked.html')
 
 
 
@@ -312,7 +313,7 @@ def bariq_homepage(request):
 
 
 
-
+ 
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     variants = product.variants.filter(is_active=True)
@@ -362,18 +363,18 @@ def product_detail(request, product_id):
     })
 
 def Shop_page(request):
-    products = Product.objects.all()
+    products = Product.objects.filter(is_active=True,variants__is_active=True).distinct()
 
     # Filter by category
     category = request.GET.get('category')
     if category:
-        products = products.filter(category__name=category)
+        products = products.filter(category__name=category,is_active=False)
 
     # Filter by price range
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price and max_price:
-        products = products.filter(price__gte=min_price, price__lte=max_price)
+        products = products.filter(price__gte=min_price,price__lte=max_price)
 
     # Sorting
     sort = request.GET.get('sort')

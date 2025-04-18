@@ -8,8 +8,6 @@
 </head>
 
 <style>
-    /* [Previous CSS remains unchanged] */
-    /* Keeping all your existing styles as they are since they look good */
     /* Payment Page Container */
     .payment-container {
         max-width: 1200px;
@@ -150,6 +148,12 @@
     .payment-method-card.selected {
         border-color: #25a19b;
         background-color: rgba(37, 161, 155, 0.05);
+    }
+
+    .payment-method-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+        background-color: #f5f5f5;
     }
 
     .payment-method-icon {
@@ -407,12 +411,6 @@
         margin-right: 5px;
         color: #4caf50;
     }
-    .payment-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
 
     /* Responsive adjustments */
     @media (max-width: 767px) {
@@ -458,14 +456,18 @@
                     <h2>Select Payment Method</h2>
                 </div>
                 <div class="payment-methods">
-                    <div class="payment-method-card {% if payment_method == 'cod' %}selected{% else %}selected{% endif %}" data-method="cod">
+                    <div class="payment-method-card {% if final_price > 1000 %}{% if payment_method == 'cod' %}selected{% else %}selected{% endif %}{% else %}disabled{% endif %}" data-method="cod">
                         <div class="payment-method-icon">
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
                         <div class="payment-method-details">
                             <div class="payment-method-name">
                                 Cash on Delivery
-                                <span class="payment-method-status status-available">Available</span>
+                                {% if final_price > 1000 %}
+                                    <span class="payment-method-status status-available">Available</span>
+                                {% else %}
+                                    <span class="payment-method-status status-unavailable">Unavailable (Order must be above ₹1000)</span>
+                                {% endif %}
                             </div>
                             <div class="payment-method-description">Pay with cash when your order is delivered</div>
                         </div>
@@ -571,7 +573,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const paymentMethods = document.querySelectorAll('.payment-method-card');
-    let selectedMethod = '{% if payment_method %}{{ payment_method|escapejs }}{% else %}cod{% endif %}';
+    const isCodAvailable = {% if final_price > 1000 %}true{% else %}false{% endif %};
+    let selectedMethod = '{% if payment_method %}{{ payment_method|escapejs }}{% else %}{% if final_price > 1000 %}cod{% else %}razorpay{% endif %}{% endif %}';
     const completePaymentBtn = document.getElementById('completePaymentBtn');
 
     if (!completePaymentBtn) {
@@ -587,6 +590,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('PayPal is not available right now.');
                 return;
             }
+            if (methodName === 'cod' && !isCodAvailable) {
+                alert('Cash on Delivery is only available for orders above ₹1000.');
+                return;
+            }
             paymentMethods.forEach(m => m.classList.remove('selected'));
             this.classList.add('selected');
             selectedMethod = methodName;
@@ -600,6 +607,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!selectedMethod) {
             alert('Please select a payment method.');
+            return;
+        }
+
+        if (selectedMethod === 'cod' && !isCodAvailable) {
+            alert('Cash on Delivery is only available for orders above ₹1000.');
             return;
         }
 

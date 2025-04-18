@@ -71,11 +71,14 @@ class Product(models.Model):
 
 
     def save(self, *args, **kwargs):
-        """Ensure offer price updates and all changes are saved."""
-        self.update_offer_price()  # Update offer_price before saving
-        print(f"Before save - offer_price: {self.offer_price}")
-        super(Product, self).save(*args, **kwargs)
-        print(f"After save - offer_price: {self.offer_price}")
+        is_new = self.pk is None
+        super().save(*args, **kwargs)  # First save to get PK
+
+        if is_new:  # Only run this after the object is saved
+            self.update_offer_price()
+            print(f"After update_offer_price - offer_price: {self.offer_price}")
+            super().save(update_fields=['offer_price'])  # Save only the updated field
+
 
     def __str__(self):
         return self.name

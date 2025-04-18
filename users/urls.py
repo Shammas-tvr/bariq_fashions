@@ -17,6 +17,8 @@ urlpatterns = [
     # product detail
     path('product_detail/<int:product_id>/',views. product_detail, name='product_detail'),
     # shop page
-    path('shope_page/',views.Shop_page,name='shop_page')
+    path('shope_page/',views.Shop_page,name='shop_page'),
+    # userblocked page
+    path('blocked/',views.blocked_user_view,name='blocked_page')
 
 ]

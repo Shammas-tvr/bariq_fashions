@@ -3,9 +3,6 @@ from . import views
 
 urlpatterns = [
     path('admin_dashboard/',views.Admin_Dashboard,name='admin_dashboard'),
-    path('edit-user/<int:users_id>/',views.edit_user, name='edit_user'),
-    path('block-user/<int:users_id>/',views.block_user, name='block_user'),
-    path('unblock-user/<int:users_id>/',views.unblock_user, name='unblock_user'),
     path('user_management/', views.user_management, name='user_management'),
     path('toggle_user_status/', views.toggle_user_status, name='toggle_user_status'),
 

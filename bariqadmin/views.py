@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login,logout
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required,user_passes_test
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.admin.views.decorators import staff_member_required
 from users.models import CustomUser
 from django.core.paginator import Paginator
 from users.models import CustomUser
@@ -52,6 +53,7 @@ def is_admin(User):
     return User.is_staff
 
 #_______________________________________________________________________________________________________________________________#
+@staff_member_required
 def Admin_Dashboard(request):
     # Get time filter and date range from request
     filter_type = request.GET.get('filter', 'monthly')
@@ -189,43 +191,7 @@ def get_default_dates(filter_type, today):
 
 
 
-@login_required
-@user_passes_test(is_admin)
-def edit_user(request,users_id):
-    users=get_object_or_404(CustomUser,id=users_id)
-    if request.method == 'POST':
-        users.username=request.POST['username']
-        users.email=request.POST['email']
-        users.is_staff='is_staff' in request.POST
-        users.save()
-        return redirect('user_management.html')
-    return render(request,'user_management.html',{'users':users})
-
-
-@login_required
-@user_passes_test(is_admin)
-def block_user(request,users_id):
-    users=get_object_or_404(CustomUser,id=users_id)
-    users.is_blocked=True
-    users.is_active=False
-    users.save()
-    return redirect('user_management.html')
-
-
-@login_required
-@user_passes_test(is_admin)
-def unblock_user(request,users_id):
-    users=get_object_or_404(CustomUser,users_id)
-    users.is_blocked=False
-    users.is_active=True
-    users.save()
-
-    return redirect('user_management.html')
-
-
-
-@login_required
-@user_passes_test(is_admin)
+@staff_member_required
 def user_management(request):
     print('Rendering user management view')
     users_list = CustomUser.objects.filter(is_superuser=False).order_by('-date_of_joining')
@@ -238,18 +204,22 @@ def user_management(request):
     }
     return render(request, 'user_management.html', context)
 
+@csrf_exempt
 @require_POST
 def toggle_user_status(request):
-    print('Toggling user status')
     user_id = request.POST.get('user_id')
-    print(f'User ID: {user_id}')
-    user = get_object_or_404(CustomUser, id=user_id)
-    user.status = 'blocked' if user.status == 'active' else 'active'
-    user.save()
-    print(f'New status: {user.status}')
-    return JsonResponse({'status': 'success', 'new_status': user.status})
+    if not user_id:
+        return JsonResponse({'status': 'error', 'message': 'User ID is required'}, status=400)
 
+    try:
+        user = CustomUser.objects.get(id=user_id)
+        user.is_blocked = not user.is_blocked
+        user.save()
+        return JsonResponse({'status': 'success', 'is_blocked': user.is_blocked})
+    except CustomUser.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'}, status=404)
 
+@staff_member_required
 def offers(request):
     return render(request,'offers.html')
 
