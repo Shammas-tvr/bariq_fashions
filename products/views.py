@@ -12,7 +12,7 @@ from datetime import date
 
 
 
-
+@staff_member_required
 def add_product(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -20,7 +20,7 @@ def add_product(request):
         price = request.POST.get('price')
         offer_price = request.POST.get('offer_price')
         category_id = request.POST.get('category')
-        brand=request.POST.get('brand')
+        brand = request.POST.get('brand')
 
         # Validate the data
         if not name or not price or not offer_price or not category_id:
@@ -34,7 +34,16 @@ def add_product(request):
             messages.error(request, 'Price and offer price must be valid numbers.')
             return redirect('add_product')
 
-        category = Category.objects.get(id=category_id)
+        #Validate offer price logic
+        if offer_price >= price:
+            messages.error(request, 'Offer price must be less than the actual price.')
+            return redirect('add_product')
+
+        try:
+            category = Category.objects.get(id=category_id)
+        except Category.DoesNotExist:
+            messages.error(request, 'Invalid category selected.')
+            return redirect('add_product')
 
         # Create and save the product
         product = Product(
@@ -56,6 +65,7 @@ def add_product(request):
 
 
 
+@staff_member_required
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     categories = Category.objects.all()
@@ -68,7 +78,7 @@ def edit_product(request, product_id):
         price = request.POST.get('price')
         offer_price = request.POST.get('offer_price')
         category_id = request.POST.get('category')
-        brand=request.POST.get('brand')
+        brand = request.POST.get('brand')
 
         # Basic validation
         if not name:
@@ -77,44 +87,52 @@ def edit_product(request, product_id):
             errors.append("Price is required")
         if not category_id:
             errors.append("Category is required")
-        else:
-            try:
-                category = Category.objects.get(id=category_id)
-            except Category.DoesNotExist:
-                errors.append("Invalid category selected")
 
         # Convert numeric fields
         try:
             price = float(price) if price else None
         except ValueError:
             errors.append("Invalid price format")
-        
+
         try:
             offer_price = float(offer_price) if offer_price else None
         except ValueError:
             errors.append("Invalid offer price format")
 
+        # Offer price must be less than actual price
+        if price is not None and offer_price is not None and offer_price >= price:
+            errors.append("Offer price must be less than the actual price")
+
+        # Check category existence
+        try:
+            category = Category.objects.get(id=category_id)
+        except (Category.DoesNotExist, ValueError, TypeError):
+            errors.append("Invalid category selected")
+            category = None
+
+        # If no errors, update the product
         if not errors:
-            # Update product
             product.name = name
             product.description = description
             product.price = price
             product.offer_price = offer_price
             product.category = category
-            product.brand=brand
+            product.brand = brand
             product.save()
+            messages.success(request, 'Product updated successfully!')
             return redirect('product_list')
 
-        # If errors, retain entered values
+        # If errors, retain entered values (optional but helps with user experience)
         product.name = name
         product.description = description
         product.price = price
         product.offer_price = offer_price
+        product.brand = brand
 
     context = {
         'product': product,
         'categories': categories,
-        'errors': errors
+        'errors': errors,
     }
     return render(request, 'edit_product.html', context)
 
@@ -123,6 +141,7 @@ def edit_product(request, product_id):
 
 
 
+@staff_member_required
 def toggle_variant_status(request):
     if request.method == 'POST':
         variant_id = request.POST.get('variant_id')
@@ -134,7 +153,7 @@ def toggle_variant_status(request):
     return JsonResponse({'status': 'error'})
 
 
-
+@staff_member_required
 def toggle_product_status(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
@@ -147,7 +166,7 @@ def toggle_product_status(request):
         })
     return JsonResponse({'status': 'error'}, status=400)
 
-
+@staff_member_required
 def add_variant(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     
@@ -208,7 +227,7 @@ def add_variant(request, product_id):
 
 
 
-
+@staff_member_required
 @require_http_methods(["GET", "POST"])
 def edit_variant(request, product_id, variant_id):
     product = get_object_or_404(Product, id=product_id)
@@ -275,7 +294,7 @@ def edit_variant(request, product_id, variant_id):
         'size_suggestions': size_suggestions
     })
 
-
+@staff_member_required
 def variant_list(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     variants = ProductVariant.objects.prefetch_related("images").filter(product_id=product_id)
@@ -288,7 +307,7 @@ def variant_list(request, product_id):
         'product': product,
         'page_obj': page_obj
     })
-
+@staff_member_required
 def product_managment(request):
     products = Product.objects.all()
     paginator = Paginator(products, 10)
@@ -296,7 +315,7 @@ def product_managment(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'product_management.html', {'page_obj': page_obj})
 
-
+@staff_member_required
 def product_offer_list(request):
     offers=ProductOffer.objects.all()
     return render(request,'product_offer_list.html',{'offers':offers})
@@ -304,7 +323,7 @@ def product_offer_list(request):
 #------------------------------------------------------------------------------------------------------------------------------------#
 #product offer section 
 
-
+@staff_member_required
 def add_product_offer(request):
     today = date.today().isoformat() 
     
@@ -327,7 +346,7 @@ def add_product_offer(request):
 
 
 
-
+@staff_member_required
 def edit_product_offer(request,offer_id):
     offer=get_object_or_404(ProductOffer,id=offer_id)
     today = date.today().isoformat() 
@@ -344,7 +363,7 @@ def edit_product_offer(request,offer_id):
 
 
 
-
+@staff_member_required
 def toggle_product_offer_status(request,offer_id):
     offer=get_object_or_404(ProductOffer,id=offer_id)    
     offer.is_active = not offer.is_active
