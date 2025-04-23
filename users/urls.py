@@ -14,6 +14,7 @@ urlpatterns = [
     path('facebook-auth/', views.Facebook_Athen, name='facebook_auth'),
     #home page
     path('', views.bariq_homepage, name='homepage'),
+    path('contact/',views.contact, name='contact'),
     # product detail
     path('product_detail/<int:product_id>/',views. product_detail, name='product_detail'),
     # shop page

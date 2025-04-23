@@ -4,28 +4,41 @@
 
 {% block content %}
 <div class="space-y-8 px-4 py-6">
+    <!-- Messages -->
+    {% if messages %}
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- Filter Card -->
     <div class="bg-white rounded-xl shadow p-6 border border-gray-100">
         <h2 class="text-xl font-semibold text-gray-800 mb-4">Dashboard Filters</h2>
         <form method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
             <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Time Period</label>
-                <select name="filter" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2" onchange="location = this.value;">
-                    <option value="?filter=daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
-                    <option value="?filter=weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
-                    <option value="?filter=monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-                    <option value="?filter=yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+                <select name="filter" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+                    <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+                    <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                    <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                    <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
                 </select>
             </div>
             <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
-                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+                <input type="date" name="start_date" value="{% if is_custom_range %}{{ start_date|date:'Y-m-d' }}{% endif %}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
             </div>
             <div class="flex-1">
                 <label class="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+                <input type="date" name="end_date" value="{% if is_custom_range %}{{ end_date|date:'Y-m-d' }}{% endif %}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500 py-2">
+            </div>
+            <div>
+                <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500">Apply Filters</button>
             </div>
         </form>
+        <p class="text-sm text-gray-500 mt-2">Note: Enter both start and end dates for custom range filtering. Leave blank to use the selected time period.</p>
     </div>
 
     <!-- Summary Cards -->
@@ -52,7 +65,7 @@
                 </div>
             </div>
         </div>
-        <div class="bg-white rounded-xl shadow p-6 border border-gray-100 transition-all hover:shadow-md">
+        <div class="bg-white rounded-xl shadow p-6 border border-gray-100 transition-all hoverGames:shadow-md">
             <div class="flex items-center">
                 <div class="p-4 rounded-full bg-blue-100">
                     <i class="fas fa-users text-blue-600 text-xl"></i>
@@ -70,7 +83,9 @@
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-semibold text-gray-800">Sales Overview</h3>
             <div class="text-sm text-gray-500">
-                <i class="fas fa-info-circle mr-1"></i> {{ filter_type|title }} View
+                <i class="fas fa-info-circle mr-1"></i> 
+                {% if is_custom_range %}Custom Range ({{ start_date|date:"Y-m-d" }} to {{ end_date|date:"Y-m-d" }})
+                {% else %}{{ filter_type|title }} View{% endif %}
             </div>
         </div>
         <div class="h-80">
@@ -144,11 +159,15 @@
     .text-yellow-500 { color: #eab308; }
     .text-green-500 { color: #16a34a; }
     .bg-primary-600 { background-color: #0d6efd; }
+    .bg-primary-700 { background-color: #0b5ed7; }
     .bg-gray-50 { background-color: #f9fafb; }
     .border-gray-100 { border-color: #f3f4f6; }
     .text-gray-300 { color: #d1d5db; }
     .text-gray-500 { color: #6b7280; }
     .text-gray-700 { color: #374151; }
+    .bg-red-100 { background-color: rgba(254, 226, 226, 1); }
+    .border-red-500 { border-color: #ef4444; }
+    .text-red-700 { color: #b91c1c; }
 </style>
 {% endblock %}
 
@@ -158,29 +177,30 @@
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('salesChart').getContext('2d');
         const filterType = '{{ filter_type }}';
+        const isCustomRange = {{ is_custom_range|yesno:"true,false" }};
         
-        // Configure labels based on filter type
+        // Configure labels based on filter type or custom range
         const labels = [{% for sale in sales_data %}
-            {% if filter_type == 'yearly' %}
+            {% if filter_type == 'yearly' and not is_custom_range %}
                 '{{ sale.order_date__date|stringformat:"s" }}',
-            {% elif filter_type == 'daily' %}
+            {% elif filter_type == 'daily' and not is_custom_range %}
                 '{{ sale.order_date__date|stringformat:"s" }}:00',
             {% else %}
                 '{{ sale.order_date__date }}',
             {% endif %}
         {% endfor %}];
         
-        const formattedLabels = labels.map(label => {
-            if (filterType === 'yearly') {
+        const formattedLabels = labels.map((label, index) => {
+            if (filterType === 'yearly' && !isCustomRange) {
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
                                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 const monthNum = parseInt(label) - 1;
                 return monthNames[monthNum >= 0 && monthNum < 12 ? monthNum : 0];
-            } else if (filterType === 'daily') {
+            } else if (filterType === 'daily' && !isCustomRange) {
                 const hour = parseInt(label.split(':')[0]);
                 return hour < 12 ? `${hour === 0 ? 12 : hour}AM` : `${hour === 12 ? 12 : hour - 12}PM`;
             }
-            return label;
+            return label; // Use raw date for custom or other ranges
         });
         
         const salesChart = new Chart(ctx, {

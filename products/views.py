@@ -215,7 +215,6 @@ def add_variant(request, product_id):
             })
 
         except Exception as e:
-            print(f"Error creating variant: {str(e)}")
             return JsonResponse({
                 'errors': ['An error occurred while saving the variant. Please try again.']
             }, status=500)
@@ -282,7 +281,6 @@ def edit_variant(request, product_id, variant_id):
             })
 
         except Exception as e:
-            print(f"Error updating variant: {str(e)}")
             return JsonResponse({
                 'errors': ['An error occurred while updating the variant. Please try again.']
             }, status=500)
@@ -336,7 +334,7 @@ def add_product_offer(request):
        
     else:
         form = ProductOfferForm()
-    
+        form.fields['product'].queryset = Product.objects.filter(is_active=True)    
     return render(request, 'add_product_offer.html', {
         'form': form,
         'today': today
@@ -358,7 +356,8 @@ def edit_product_offer(request,offer_id):
             messages.success(request,'Product offer updated successfully')
             return redirect('product_offer_list')
     else:
-        form=ProductOfferForm(instance=offer)    
+        form=ProductOfferForm(instance=offer) 
+        form.fields['product'].queryset = Product.objects.filter(is_active=True)   
     return render(request,'edit_product_offer.html',{'form':form,'today':today})   
 
 

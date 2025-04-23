@@ -6,104 +6,124 @@
 
 {% block content %}
 <div class="space-y-6">
-    <!-- Filter Card -->
-    <div class="bg-white rounded-lg shadow-sm p-6">
-        <form method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Type</label>
-                <select name="filter" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
-                    <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
-                    <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
-                    <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
-                    <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom</option>
-                </select>
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Total Orders -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-primary-100 flex-shrink-0">
+                    <span class="material-icons-round text-primary-600 text-2xl">shopping_cart</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Orders</p>
+                    <p class="text-xl font-bold text-gray-800">{{ total_sales_count }}</p>
+                </div>
             </div>
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
+        </div>
+        <!-- Total Sales -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-green-100 flex-shrink-0">
+                    <span class="material-icons-round text-green-600 text-2xl">attach_money</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Total Sales</p>
+                    <p class="text-xl font-bold text-gray-800">₹{{ total_sales_amount|floatformat:2 }}</p>
+                </div>
             </div>
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
+        </div>
+        <!-- Product Discounts -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-red-100 flex-shrink-0">
+                    <span class="material-icons-round text-red-600 text-2xl">discount</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Product Discounts</p>
+                    <p class="text-xl font-bold text-gray-800">₹{{ total_product_discount|floatformat:2 }}</p>
+                </div>
             </div>
-            <div>
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-200">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                    </svg>
-                    Apply Filter
-                </button>
+        </div>
+        <!-- Coupon Discounts -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-orange-100 flex-shrink-0">
+                    <span class="material-icons-round text-orange-600 text-2xl">local_offer</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Coupon Discounts</p>
+                    <p class="text-xl font-bold text-gray-800">₹{{ total_coupon_discount|floatformat:2 }}</p>
+                </div>
             </div>
-        </form>
+        </div>
+        <!-- Shipping Costs -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-purple-100 flex-shrink-0">
+                    <span class="material-icons-round text-purple-600 text-2xl">local_shipping</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Shipping Costs</p>
+                    <p class="text-xl font-bold text-gray-800">₹{{ total_shipping|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Net Sales -->
+        <div class="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-blue-100 flex-shrink-0">
+                    <span class="material-icons-round text-blue-600 text-2xl">savings</span>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Net Sales</p>
+                    <p class="text-xl font-bold text-gray-800">₹{{ total_sales_amount|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-primary-100">
-                    <span class="material-icons-round text-primary-600">shopping_cart</span>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Total Orders</p>
-                    <p class="text-2xl font-semibold text-gray-800">{{ total_sales_count }}</p>
-                </div>
-            </div>
+    <!-- Report Period and Filter Combined -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Report Period -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Report Period</h3>
+            <p class="text-sm text-gray-600">
+                Showing data from 
+                <span class="font-medium">{{ start_date|date:"Y-m-d" }}</span> 
+                to 
+                <span class="font-medium">{{ end_date|date:"Y-m-d" }}</span>
+            </p>
         </div>
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-green-100">
-                    <span class="material-icons-round text-green-600">attach_money</span>
+        <!-- Filter Card -->
+        <div class="bg-white rounded-xl shadow-sm p-6">
+            <form method="GET" class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filter Type</label>
+                    <select name="filter" id="filter-type" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="daily" {% if filter_type == 'daily' %}selected{% endif %}>Daily</option>
+                        <option value="weekly" {% if filter_type == 'weekly' %}selected{% endif %}>Weekly</option>
+                        <option value="monthly" {% if filter_type == 'monthly' %}selected{% endif %}>Monthly</option>
+                        <option value="yearly" {% if filter_type == 'yearly' %}selected{% endif %}>Yearly</option>
+                        <option value="custom" {% if filter_type == 'custom' %}selected{% endif %}>Custom</option>
+                    </select>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Total Sales</p>
-                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_sales_amount|floatformat:2 }}</p>
+                <div class="flex-1" id="start-date-container" {% if filter_type != 'custom' %}style="display: none;"{% endif %}>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" name="start_date" value="{{ start_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
                 </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-100">
-                    <span class="material-icons-round text-red-600">discount</span>
+                <div class="flex-1" id="end-date-container" {% if filter_type != 'custom' %}style="display: none;"{% endif %}>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                    <input type="date" name="end_date" value="{{ end_date|date:'Y-m-d' }}" class="w-full rounded-md border-gray-300 focus:ring-primary-500 focus:border-primary-500">
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Product Discounts</p>
-                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_product_discount|floatformat:2 }}</p>
+                <div>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors duration-200">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        Apply Filter
+                    </button>
                 </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-orange-100">
-                    <span class="material-icons-round text-orange-600">local_offer</span>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Coupon Discounts</p>
-                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_coupon_discount|floatformat:2 }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-purple-100">
-                    <span class="material-icons-round text-purple-600">local_shipping</span>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Shipping Costs</p>
-                    <p class="text-2xl font-semibold text-gray-800">₹{{ total_shipping|floatformat:2 }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="p-3 rounded-full bg-blue-100">
-                    <span class="material-icons-round text-blue-600">savings</span>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm text-gray-600">Net Sales</p>
-                    <p class="text-2xl font-semibold text-gray-800">₹{{ net_sales|floatformat:2 }}</p>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -159,4 +179,18 @@
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('filter-type').addEventListener('change', function() {
+    const startDateContainer = document.getElementById('start-date-container');
+    const endDateContainer = document.getElementById('end-date-container');
+    if (this.value === 'custom') {
+        startDateContainer.style.display = 'block';
+        endDateContainer.style.display = 'block';
+    } else {
+        startDateContainer.style.display = 'none';
+        endDateContainer.style.display = 'none';
+    }
+});
+</script>
 {% endblock %}

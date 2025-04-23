@@ -11,7 +11,8 @@ from django.core.paginator import Paginator
 import random
 import time
 from django.utils.timezone import now
-from products.models import Product
+from products.models import Product,ProductVariant
+from django.db.models import Exists, OuterRef
 from wishlist.models import Wishlist
 from category.models import Category
 
@@ -314,14 +315,25 @@ def bariq_homepage(request):
 
 
  
+
+
 def product_detail(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     variants = product.variants.filter(is_active=True)
     first_variant = variants.first() if variants.exists() else None
-    related_products = Product.objects.filter(
-        category=product.category, 
-        is_active=True
+
+    # Filter related products that have at least one active variant
+    related_variant_subquery = ProductVariant.objects.filter(
+        product=OuterRef('pk'), is_active=True
+    )
+    related_products = Product.objects.annotate(
+        has_active_variant=Exists(related_variant_subquery)
+    ).filter(
+        category=product.category,
+        is_active=True,
+        has_active_variant=True
     ).exclude(id=product_id).order_by('-created_at')[:4]
+
 
     active_offer = product.get_active_offer()
 
@@ -337,10 +349,6 @@ def product_detail(request, product_id):
         start_date__lte=current_time, 
         end_date__gte=current_time
     ).order_by('-discount_percentage').first()
-    print(f"Product: {product.name}")
-    print(f"Product Offer: {product_offer.discount_percentage if product_offer else 'None'}%")
-    print(f"Category Offer: {category_offer.discount_percentage if category_offer else 'None'}%")
-    print(f"Active Offer Returned: {active_offer}")
 
     related_products_data = []
     for related_product in related_products:
@@ -361,6 +369,7 @@ def product_detail(request, product_id):
         'offer_percentage': active_offer['offer_percentage'] if active_offer else None,
         'discounted_price': active_offer['offer_price'] if active_offer else product.price,
     })
+
 
 def Shop_page(request):
     products = Product.objects.filter(is_active=True,variants__is_active=True).distinct()
@@ -405,3 +414,8 @@ def Shop_page(request):
     }
 
     return render(request, 'shop_page.html', context)
+
+#____________________________________________________________________________________________________________#
+
+def contact(request):
+    return render(request,'contact.html')

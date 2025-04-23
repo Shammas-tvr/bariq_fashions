@@ -719,71 +719,76 @@ def admin_order_detail(request, order_id):
 
 
 
+
 @staff_member_required
 def admin_update_order_item_status(request, order_id, item_id):
     order = get_object_or_404(Order, order_id=order_id)
     order_item = get_object_or_404(OrderItem, id=item_id)
-    
+
     if request.method == "POST":
         new_status = request.POST.get("status")
+
         if not new_status:
             messages.error(request, "No status provided.")
             return redirect('admin_order_detail', order_id=order.order_id)
-        
+
         all_items = order.items.all()
         all_cancelled = all(item.status == 'cancelled' for item in all_items)
-        
+
         if all_cancelled:
             messages.error(request, "This order is fully cancelled. You cannot update item statuses.")
             return redirect('admin_order_detail', order_id=order.order_id)
-        
-        if order_item.status == 'cancelled' and new_status == 'delivered':
+
+        current_status = order_item.status
+
+        # ❌ Prevent changing status of refunded item (except keeping it as refunded)
+        if current_status == 'refunded' and new_status != 'refunded':
+            messages.error(request, "Cannot change status of an already refunded item.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        # ❌ Refund only allowed from return_processed
+        if current_status != 'return_processed' and new_status == 'refunded':
+            messages.error(request, "Refunds can only be issued after return is processed.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        # ❌ Only delivered products can be cancelled
+        if new_status == 'cancelled' and current_status != 'delivered':
+            messages.error(request, "Only delivered items can be cancelled.")
+            return redirect('admin_order_detail', order_id=order.order_id)
+
+        # ❌ Cannot mark cancelled product as delivered
+        if current_status == 'cancelled' and new_status == 'delivered':
             messages.error(request, "Cannot deliver an item that has already been cancelled.")
             return redirect('admin_order_detail', order_id=order.order_id)
-        
-        if order_item.status == 'delivered' and new_status == 'cancelled':
-            messages.error(request, "Cannot cancel an item that has already been delivered.")
-            return redirect('admin_order_detail', order_id=order.order_id)
-        
-        # Handle refund logic
+
+        # ✅ Process refund
         if new_status == 'refunded':
             try:
                 user = order.user
-                
-                # Start with the base price minus item-specific discount
-                # The order_item.discount is the product discount already applied
-                item_subtotal = order_item.price * order_item.quantity  # Original price
-                item_with_discount = item_subtotal - order_item.discount  # After product discount
-                
-                # Calculate the coupon discount specifically for this item
+                item_subtotal = order_item.price * order_item.quantity
+                item_with_discount = item_subtotal - order_item.discount
+
+                # Calculate coupon impact
                 coupon_discount_for_item = 0
                 if order.coupon and order.coupon_discount > 0:
                     if order.coupon.is_percentage:
-                        # For percentage coupons, recalculate the percentage on this item
                         coupon_discount_for_item = item_with_discount * (order.coupon.discount / 100)
-                        
-                        # Check if there's a max_discount constraint
-                        if order.coupon.max_discount is not None:
+                        if order.coupon.max_discount:
                             coupon_discount_for_item = min(coupon_discount_for_item, order.coupon.max_discount)
                     else:
-                        # For fixed coupons, distribute proportionally
                         total_order_value = sum((item.price * item.quantity) - item.discount for item in all_items)
-                        if total_order_value > 0:  # Avoid division by zero
+                        if total_order_value > 0:
                             item_proportion = item_with_discount / total_order_value
                             coupon_discount_for_item = order.coupon_discount * item_proportion
-                
-                # Calculate final refund amount
+
                 refund_amount = item_with_discount - coupon_discount_for_item
-                
-                # Ensure refund amount is not negative
                 refund_amount = max(refund_amount, 0)
-                
-                # Create wallet transaction for the refund
-                wallet, created = Wallet.objects.get_or_create(user=user)
+
+                # Credit wallet
+                wallet, _ = Wallet.objects.get_or_create(user=user)
                 wallet.balance += refund_amount
                 wallet.save()
-                
-                # Create wallet transaction record
+
                 WalletTransaction.objects.create(
                     wallet=wallet,
                     amount=refund_amount,
@@ -791,19 +796,21 @@ def admin_update_order_item_status(request, order_id, item_id):
                     order=order,
                     description=f'Refund for order item #{order_item.id} in order #{order.order_id}'
                 )
-                
+
                 messages.success(request, f"Item refunded and ₹{refund_amount:.2f} added to customer's wallet.")
             except Exception as e:
                 messages.error(request, f"Error processing refund: {str(e)}")
                 return redirect('admin_order_detail', order_id=order.order_id)
-        
+
+        # Save updated status
         order_item.status = new_status
         order_item.save()
-        
-        if new_status != 'refunded':  # We've already added a success message for refunds
+
+        if new_status != 'refunded':
             messages.success(request, f"Item status updated to {new_status.capitalize()}.")
-        
+
         return redirect('admin_order_detail', order_id=order.order_id)
+
 
 
 #--------------------------------------------------------------------------------------------------------------------------------#

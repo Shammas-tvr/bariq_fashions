@@ -65,9 +65,7 @@ class Product(models.Model):
             if self.offer_price != new_offer_price:  # Update only if there's a change
                 self.offer_price = new_offer_price
                 self.save(update_fields=['offer_price'])  # Save only the offer_price field
-                print(f"Offer price updated for {self.name}: {self.offer_price}")
-        else:
-            print(f"No active offer for {self.name}, keeping the last offer price: {self.offer_price}")
+
 
 
     def save(self, *args, **kwargs):
@@ -76,7 +74,6 @@ class Product(models.Model):
 
         if is_new:  # Only run this after the object is saved
             self.update_offer_price()
-            print(f"After update_offer_price - offer_price: {self.offer_price}")
             super().save(update_fields=['offer_price'])  # Save only the updated field
 
 

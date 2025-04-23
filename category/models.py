@@ -33,10 +33,10 @@ class CategoryOffer(models.Model):
         return f"{self.category.name} - {self.discount_percentage}%"
 
     def check_and_deactivate(self):
-        """Check if the offer has expired and deactivate it."""
-        if self.end_date < now():
+        if self.end_date < now() and self.is_active:
             self.is_active = False
-            self.save()
+            super(CategoryOffer, self).save(update_fields=['is_active'])  # safer way
+
 
     def save(self, *args, **kwargs):
         """Ensure expired offers are deactivated and update related product offer prices."""
