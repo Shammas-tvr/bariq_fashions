@@ -22,7 +22,7 @@ urlpatterns = [
     path('order/cancel-item/<str:order_id>/<int:item_id>/', views.cancel_order_item, name='cancel_order_item'),
     path('order-history/', views.order_history, name='order_history'),
     path("order/<str:order_id>/", views.order_detail, name="order_details"),
-    path('order-tracking/<str:order_id>/', views.order_tracking, name='track_order'),
+    path("orders/<str:order_id>/items/<int:item_id>/tracking/", views.order_item_tracking, name='track_item_order'),
         # order return
     path('order/<str:order_id>/return/<int:item_id>/',views.request_order_return, name='request_order_return'),
     path('order/<str:order_id>/submit-return/', views.submit_order_return, name='submit_order_return'),

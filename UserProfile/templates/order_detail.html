@@ -236,6 +236,21 @@
         box-shadow: 0 5px 15px rgba(37, 161, 155, 0.3);
     }
 
+    .order-details-container .track-btn {
+        background: #ffffff;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .order-details-container .track-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(37, 161, 155, 0.3);
+    }
+
     .order-details-container .order-cancel-btn {
         background: var(--danger-color);
         color: white;
@@ -319,6 +334,7 @@
         .order-details-container .h5 { font-size: 1rem; }
         .order-details-container .cancel-btn { font-size: 1rem; padding: 0.5rem 1rem; }
         .order-details-container .return-btn { font-size: 1rem; padding: 0.5rem 1rem; }
+        .order-details-container .track-btn { font-size: 1rem; padding: 0.5rem 1rem; }
         .order-details-container .order-cancel-btn { font-size: 1rem; padding: 0.5rem 1rem; }
         .order-details-container .order-return-btn { font-size: 1rem; padding: 0.5rem 1rem; }
     }
@@ -387,14 +403,6 @@
                                 <span class="fw-bold text-muted">Total Amount</span>
                                 <span class="text-dark h5">₹{{ order.total_amount }}</span>
                             </div>
-                            {% if order.status != 'Cancelled' and order.status != 'Processing' %}
-                            <div class="mt-3">
-                                <a href="{% url 'track_order' order.order_id %}" 
-                                   class="btn btn-primary w-100 py-3 mb-2">
-                                    <i class="bi bi-truck me-2"></i>Track Shipment
-                                </a>
-                            </div>
-                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -484,17 +492,25 @@
                                             <p class="mb-2 h5">
                                                 ₹{{ item.final_price }}
                                             </p>
-                                            {% if item.status|lower == 'pending' or item.status|lower == 'processing' %}
-                                            <button onclick="cancelItem('{{ order.order_id }}', '{{ item.id }}')" 
-                                                    class="btn cancel-btn mt-2">
-                                                <i class="bi bi-x-circle me-2"></i>Cancel Item
-                                            </button>
-                                            {% elif item.status|lower == 'delivered' %}
-                                            <a href="{% url 'request_order_return' order_id=order.order_id item_id=item.id %}" 
-                                               class="btn return-btn mt-2">
-                                                <i class="bi bi-arrow-counterclockwise me-2"></i>Return Item
-                                            </a>
-                                            {% endif %}
+                                            <div class="d-flex flex-wrap gap-2 justify-content-sm-end mt-2">
+                                                {% if item.status|lower == 'pending' or item.status|lower == 'processing' %}
+                                                <button onclick="cancelItem('{{ order.order_id }}', '{{ item.id }}')" 
+                                                        class="btn cancel-btn">
+                                                    <i class="bi bi-x-circle me-2"></i>Cancel Item
+                                                </button>
+                                                {% elif item.status|lower == 'delivered' %}
+                                                <a href="{% url 'request_order_return' order_id=order.order_id item_id=item.id %}" 
+                                                   class="btn return-btn">
+                                                    <i class="bi bi-arrow-counterclockwise me-2"></i>Return Item
+                                                </a>
+                                                {% endif %}
+                                                {% if item.status|lower != 'cancelled' %}
+                                                <a href="{% url 'track_item_order' order_id=order.order_id item_id=item.id %}" 
+                                                   class="btn track-btn">
+                                                    <i class="bi bi-truck me-2"></i>Track Item
+                                                </a>
+                                                {% endif %}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -511,12 +527,6 @@
                 <a href="{% url 'order_history' %}" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left me-2"></i>Back to Orders
                 </a>
-                {% if order.status != 'Cancelled' and order.status != 'Processing' %}
-                <a href="{% url 'track_order' order.order_id %}" 
-                   class="btn btn-primary d-md-none">
-                    <i class="bi bi-truck me-1"></i>Track
-                </a>
-                {% endif %}
             </div>
         </div>
     </div>

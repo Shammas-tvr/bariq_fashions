@@ -281,12 +281,22 @@ def sales_report(request):
     ).distinct()
 
     # Calculate aggregates
+    aggregates = orders.aggregate(
+        total_subtotal=Sum('subtotal'),
+        total_product_discount=Sum('product_discount'),
+        total_coupon_discount=Sum('coupon_discount'),
+        total_shipping=Sum('shipping_cost')
+    )
+
     total_sales_count = orders.count()
-    total_sales_amount = orders.aggregate(total=Sum('subtotal'))['total'] or 0
-    total_product_discount = orders.aggregate(total=Sum('product_discount'))['total'] or 0
-    total_coupon_discount = orders.aggregate(total=Sum('coupon_discount'))['total'] or 0
-    total_shipping = orders.aggregate(total=Sum('shipping_cost'))['total'] or 0
-    net_sales = orders.aggregate(total=Sum('total_amount'))['total'] or 0
+    total_sales_amount = aggregates['total_subtotal'] or 0
+    total_product_discount = aggregates['total_product_discount'] or 0
+    total_coupon_discount = aggregates['total_coupon_discount'] or 0
+    total_shipping = aggregates['total_shipping'] or 0
+
+    # Net sales formula
+    net_sales = total_sales_amount - total_product_discount - total_coupon_discount + total_shipping
+
 
     context = {
         'orders': orders,

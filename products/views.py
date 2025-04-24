@@ -295,23 +295,31 @@ def edit_variant(request, product_id, variant_id):
 @staff_member_required
 def variant_list(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    variants = ProductVariant.objects.prefetch_related("images").filter(product_id=product_id)
 
-    paginator = Paginator(variants, 10)  # Show 10 variants per page
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    variants = (
+        ProductVariant.objects  # base queryset
+        .filter(product_id=product_id)
+        .prefetch_related("images")
+        .order_by("-id")        # 👈 pick a stable order (e.g., newest first)
+    )
 
-    return render(request, 'variant_list.html', {
-        'product': product,
-        'page_obj': page_obj
-    })
+    paginator   = Paginator(variants, 10)
+    page_number = request.GET.get("page")
+    page_obj    = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "variant_list.html",
+        {"product": product, "page_obj": page_obj},
+    )
+
 @staff_member_required
-def product_managment(request):
-    products = Product.objects.all()
+def product_management(request):
+    products = Product.objects.all().order_by("-created_at")  # stable ordering
     paginator = Paginator(products, 10)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    return render(request, 'product_management.html', {'page_obj': page_obj})
+    return render(request, "product_management.html", {"page_obj": page_obj})
 
 @staff_member_required
 def product_offer_list(request):

@@ -10,11 +10,21 @@ from datetime import date
 
 @staff_member_required
 def category_list(request):
-    categories=Category.objects.all()
-    paginator=Paginator(categories,5)
-    page_number=request.GET.get('page')
-    page_obj=paginator.get_page(page_number)
-    return render(request,'category_list.html',{'categories':page_obj, 'total_categories':categories.count()})
+    categories = Category.objects.all().order_by("name")   # or "-id", etc.
+
+    paginator   = Paginator(categories, 5)
+    page_number = request.GET.get("page")
+    page_obj    = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "category_list.html",
+        {
+            "categories": page_obj,        # paginated slice
+            "total_categories": paginator.count,  # uses cached count
+        },
+    )
+
 
 staff_member_required
 def category_add(request):

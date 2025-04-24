@@ -243,25 +243,42 @@ def submit_order_return(request, order_id):
 
 #----------------------------------------------------------------------------------------------------------------------------------------#
 
+# keep one, canonical list of statuses
+ITEM_STATUSES = [choice[0] for choice in OrderItem.STATUS_CHOICES]
+
 @login_required
-def order_tracking(request, order_id):
-    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+def order_item_tracking(request, order_id, item_id):
+    """
+    Show the progress of a single OrderItem that belongs to the
+    current user’s order.
+    """
+    order = get_object_or_404(
+        Order.objects.select_related("user"),
+        order_id=order_id,
+        user=request.user,
+    )
+    item = get_object_or_404(
+        order.items.select_related("product_variant"),
+        pk=item_id,
+    )
 
-    status_order = ["pending", "processing", "shipped", "delivered", "cancelled"]
-    tracking_steps = []
-    
-    for status in status_order:
-        tracking_steps.append({
+    tracking_steps = [
+        {
             "status": status,
-            "label": status.capitalize(),
-            "completed": status_order.index(order.status) >= status_order.index(status),
-            "current": order.status == status
-        })
+            "label": dict(OrderItem.STATUS_CHOICES)[status],
+            "completed": ITEM_STATUSES.index(item.status) >= ITEM_STATUSES.index(status),
+            "current": item.status == status,
+        }
+        for status in ITEM_STATUSES
+    ]
 
-    return render(request, "order_tracking.html", {
+    context = {
         "order": order,
+        "item": item,
         "tracking_steps": tracking_steps,
-    })
+    }
+    return render(request, "order_item_tracking.html", context)
+
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------#
