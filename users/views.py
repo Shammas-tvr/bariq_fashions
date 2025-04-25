@@ -221,7 +221,7 @@ def reset_password(request, email):
 
 
 #------------------------------------------------------------------------------------------------------------------------------------#
-@login_required
+
 def verify_reset_otp(request):
     if 'reset_otp_data' not in request.session:
         messages.error(request, 'Please request an OTP first.')
