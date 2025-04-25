@@ -372,18 +372,28 @@ def product_detail(request, product_id):
 
 
 def Shop_page(request):
-    products = Product.objects.filter(is_active=True,variants__is_active=True).distinct()
+    # Only active products with active variants from active categories
+    products = Product.objects.filter(
+        is_active=True,
+        variants__is_active=True,
+        category__status='active'
+    ).distinct()
 
-    # Filter by category
+    # Filter by category name
     category = request.GET.get('category')
     if category:
-        products = products.filter(category__name=category,is_active=False)
+        products = products.filter(category__name__iexact=category)
 
     # Filter by price range
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
-    if min_price and max_price:
-        products = products.filter(price__gte=min_price,price__lte=max_price)
+    try:
+        if min_price and max_price:
+            min_price = float(min_price)
+            max_price = float(max_price)
+            products = products.filter(price__gte=min_price, price__lte=max_price)
+    except (ValueError, TypeError):
+        pass
 
     # Sorting
     sort = request.GET.get('sort')
@@ -396,6 +406,10 @@ def Shop_page(request):
             products = products.order_by('name')
         elif sort == 'name_desc':
             products = products.order_by('-name')
+        else:
+            products = products.order_by('-id')
+    else:
+        products = products.order_by('-id')
 
     # Pagination
     paginator = Paginator(products, 10)
@@ -407,9 +421,12 @@ def Shop_page(request):
     if request.user.is_authenticated:
         user_wishlist = Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True)
 
+    # 👇 Only active categories shown in filter suggestions
+    active_categories = Category.objects.filter(status='active')
+
     context = {
         'products': products,
-        'categories': Category.objects.all(),
+        'categories': active_categories,
         'user_wishlist': user_wishlist,
     }
 

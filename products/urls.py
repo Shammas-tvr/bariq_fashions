@@ -18,6 +18,5 @@ urlpatterns = [
     path('offers/edit/<int:offer_id>/',views.edit_product_offer, name='edit_product_offer'),
     path('offer/<int:offer_id>/toggle/', views.toggle_product_offer_status, name='toggle_product_offer_status'),
 
-
 ]
 

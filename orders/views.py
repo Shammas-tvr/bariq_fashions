@@ -1,7 +1,7 @@
-from django.shortcuts import render,get_object_or_404,redirect
-from cart.models import Cart,CartItem,Wallet,WalletTransaction
-from .models import ShippingAddress,Order,OrderItem,Address,Coupon,CouponUsage
-from .forms import AddressForm,CouponForm
+from django.shortcuts import render, get_object_or_404, redirect
+from cart.models import Cart, CartItem, Wallet, WalletTransaction
+from .models import ShippingAddress, Order, OrderItem, Address, Coupon, CouponUsage
+from .forms import AddressForm, CouponForm
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -16,9 +16,8 @@ from decimal import Decimal
 from django.db.models import F
 import razorpay
 from razorpay.errors import SignatureVerificationError
-
 import json
-
+from django.utils.timezone import now
 
 @login_required
 def checkout(request):
@@ -85,17 +84,18 @@ def checkout(request):
                 try:
                     coupon = Coupon.objects.get(code=coupon_code_input, active=True)
                     if not coupon.is_valid():
-                        messages.error(request, "This coupon is not valid.")
+                        if coupon.end_date < now():
+                            messages.error(request, "This coupon has expired.")
+                        else:
+                            messages.error(request, "This coupon is not valid.")
                     elif CouponUsage.objects.filter(user=request.user, coupon=coupon).count() >= coupon.usage_limit:
                         messages.error(request, "Coupon usage limit reached.")
                     elif subtotal_after_discount < coupon.min_order_value:
                         messages.error(request, f"Minimum order of ₹{coupon.min_order_value} required.")
                     else:
-                        # Calculate coupon discount
                         discount = (subtotal_after_discount * coupon.discount / 100) if coupon.is_percentage else coupon.discount
                         if coupon.is_percentage and coupon.max_discount:
                             discount = min(discount, coupon.max_discount)
-                        # Update session with coupon details
                         request.session['coupon_code'] = coupon.code
                         request.session['coupon_discount'] = str(discount)
                         coupon_code = coupon.code
@@ -108,18 +108,15 @@ def checkout(request):
                     coupon_code = None
                     coupon_discount = Decimal('0.00')
             else:
-                # Remove coupon if input is empty
                 request.session.pop('coupon_code', None)
                 request.session.pop('coupon_discount', None)
                 coupon_code = None
                 coupon_discount = Decimal('0.00')
                 messages.success(request, "Coupon removed.")
 
-            # Recalculate final price after coupon changes
+            # Recalculate final price
             coupon_discount = min(coupon_discount, subtotal_after_discount)
             final_price = max(subtotal_after_discount - coupon_discount + shipping_cost, Decimal('0.00'))
-            
-            # Update checkout data with coupon details and final price
             checkout_data.update({
                 'final_price': str(final_price),
                 'coupon_code': coupon_code,
@@ -127,7 +124,6 @@ def checkout(request):
             })
             request.session['checkout_data'] = checkout_data
             request.session.modified = True
-
             return redirect('checkout')
 
         elif 'proceed' in request.POST:
@@ -211,7 +207,6 @@ def payment_page(request):
     try:
         coupon_discount = Decimal(checkout_data.get('coupon_discount', '0.00'))
     except Exception as e:
-        print(f"Error parsing coupon discount: {e}")
         coupon_discount = Decimal('0.00')
 
     shipping_cost = Decimal('0.00') if subtotal_after_discount - coupon_discount > Decimal('1000') else Decimal('50.00')
@@ -250,7 +245,6 @@ def process_payment(request):
         payment_method = data.get("payment_method")
         # Optional order_id for payment retry (only applicable for razorpay)
         order_id = data.get("order_id")
-        print(f"Received payment method: {payment_method}")
 
         if payment_method not in ["cod", "razorpay"]:
             return JsonResponse({"error": f"Invalid payment method: {payment_method}"}, status=400)
@@ -273,10 +267,8 @@ def process_payment(request):
                     'payment_capture': '1'
                 })
             except razorpay.errors.BadRequestError as e:
-                print(f"Razorpay BadRequestError (retry): {str(e)}")
                 return JsonResponse({"error": f"Razorpay error: {str(e)}"}, status=400)
             except Exception as e:
-                print(f"Razorpay Authentication Error (retry): {str(e)}")
                 return JsonResponse({"error": "Payment authentication failed"}, status=500)
             order.razorpay_order_id = razorpay_order['id']
             order.save(update_fields=['razorpay_order_id'])
@@ -290,10 +282,8 @@ def process_payment(request):
 
         # Normal flow (new order creation)
         checkout_data = request.session.get('checkout_data', {})
-        print(f"Checkout data: {checkout_data}")
         address_id = checkout_data.get('address_id')
         if not address_id:
-            print("Error: Address ID missing from checkout_data")
             return JsonResponse({"error": "Address not selected"}, status=400)
 
         selected_address = Address.objects.filter(id=address_id, user=request.user).first()
@@ -420,10 +410,8 @@ def process_payment(request):
                         'payment_capture': '1'
                     })
                 except razorpay.errors.BadRequestError as e:
-                    print(f"Razorpay BadRequestError: {str(e)}")
                     return JsonResponse({"error": f"Razorpay error: {str(e)}"}, status=400)
                 except Exception as e:
-                    print(f"Razorpay Authentication Error: {str(e)}")
                     return JsonResponse({"error": "Payment authentication failed"}, status=500)
 
                 order.razorpay_order_id = razorpay_order['id']
@@ -438,10 +426,8 @@ def process_payment(request):
                 })
 
     except json.JSONDecodeError as e:
-        print(f"JSON Decode Error: {str(e)}")
         return JsonResponse({"error": "Invalid request data"}, status=400)
     except Exception as e:
-        print(f"Error in process_payment: {str(e)}")
         return JsonResponse({"error": f"Server error: {str(e)}"}, status=500)
 
 
@@ -520,7 +506,6 @@ def verify_payment(request):
             })
 
     except Exception as e:
-        print(f"Verification Error: {str(e)}")
         order_id = request.session.get('order_id')
 
         if order_id:
@@ -579,7 +564,6 @@ def retry_payment(request, order_id):
     except Order.DoesNotExist:
         return JsonResponse({"error": "Order not found"}, status=404)
     except Exception as e:
-        print(f"Retry Payment Error: {str(e)}")
         return JsonResponse({"error": "Failed to initiate retry payment"}, status=500)
 
 

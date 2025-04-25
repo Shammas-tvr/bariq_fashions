@@ -184,7 +184,6 @@ def get_default_dates(filter_type, today):
 
 @staff_member_required
 def user_management(request):
-    print('Rendering user management view')
     users_list = CustomUser.objects.filter(is_superuser=False).order_by('-date_of_joining')
     paginator = Paginator(users_list, 10)
     page = request.GET.get('page')
@@ -226,6 +225,7 @@ from datetime import datetime, timedelta
 from django.utils.timezone import now
 from django.http import HttpResponse
 from decimal import Decimal
+from django.db.models import Sum, Count, Q, F
 
 
 # PDF report imports
@@ -242,66 +242,81 @@ from openpyxl.styles import Font, PatternFill, Border, Side, Alignment, NamedSty
 from openpyxl.utils import get_column_letter
 
 
+
 @staff_member_required
 def sales_report(request):
-    filter_type = request.GET.get('filter', 'daily')
+    filter_type    = request.GET.get('filter', 'daily')
     start_date_str = request.GET.get('start_date')
-    end_date_str = request.GET.get('end_date')
-    today = now().date()
+    end_date_str   = request.GET.get('end_date')
+    today          = now().date()
 
-    # Handle date filtering
+    # 1. Determine start_date / end_date exactly as before
     if filter_type == 'daily':
-        start_date, end_date = today, today
+        start_date = end_date = today
     elif filter_type == 'weekly':
-        start_date = today - timedelta(days=today.weekday())  # Start of week (Monday)
-        end_date = today
+        start_date = today - timedelta(days=today.weekday())
+        end_date   = today
     elif filter_type == 'monthly':
         start_date = today.replace(day=1)
-        end_date = today
+        end_date   = today
     elif filter_type == 'yearly':
         start_date = today.replace(month=1, day=1)
-        end_date = today
+        end_date   = today
     elif filter_type == 'custom' and start_date_str and end_date_str:
         try:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-            # Ensure end_date is not before start_date
+            end_date   = datetime.strptime(end_date_str,   '%Y-%m-%d').date()
             if end_date < start_date:
-                start_date, end_date = today, today
+                start_date = end_date = today
         except ValueError:
-            start_date, end_date = today, today  # Fallback to today if invalid
+            start_date = end_date = today
     else:
-        start_date, end_date = today, today
+        start_date = end_date = today
 
-    # Filter orders excluding cancelled and refunded items
-    orders = Order.objects.filter(
-        order_date__date__range=[start_date, end_date]
-    ).exclude(
-        items__status__in=['cancelled', 'refunded']
-    ).distinct()
+    # 2. Base queryset: all orders in date range
+    base_orders = Order.objects.filter(order_date__date__range=(start_date, end_date))
 
-    # Calculate aggregates
-    aggregates = orders.aggregate(
-        total_subtotal=Sum('subtotal'),
-        total_product_discount=Sum('product_discount'),
-        total_coupon_discount=Sum('coupon_discount'),
-        total_shipping=Sum('shipping_cost')
+    # 3. Annotate how many items in each, and how many of those are cancelled/refunded
+    orders = base_orders.annotate(
+        total_items     = Count('items'),
+        cancelled_items = Count('items', filter=Q(items__status__in=['cancelled','refunded'])),
+    ).filter(
+        # keep any order that has at least one non-cancelled item
+        ~Q(cancelled_items=F('total_items'))
     )
 
-    total_sales_count = orders.count()
-    total_sales_amount = aggregates['total_subtotal'] or 0
-    total_product_discount = aggregates['total_product_discount'] or 0
-    total_coupon_discount = aggregates['total_coupon_discount'] or 0
-    total_shipping = aggregates['total_shipping'] or 0
+    # 4. Calculate sums *only* over the non-cancelled/refunded items
+    non_cancel_q = Q(order__in=orders) & ~Q(status__in=['cancelled','refunded'])
+    item_aggregates = OrderItem.objects.filter(non_cancel_q).aggregate(
+        subtotal             = Sum('price'),
+        product_discount     = Sum('discount'),
+    )
 
-    # Net sales formula
-    net_sales = total_sales_amount - total_product_discount - total_coupon_discount + total_shipping
+    # 5. Coupon and shipping are per‐order, include only orders we kept
+    order_aggregates = orders.aggregate(
+        coupon_discount = Sum('coupon_discount'),
+        shipping_cost   = Sum('shipping_cost'),
+    )
 
+    # 6. Totals
+    total_sales_count     = orders.count()
+    total_subtotal        = item_aggregates['subtotal'] or 0
+    total_product_discount= item_aggregates['product_discount'] or 0
+    total_coupon_discount = order_aggregates['coupon_discount'] or 0
+    total_shipping        = order_aggregates['shipping_cost'] or 0
+
+    # 7. Net sales
+    net_sales = (
+        total_subtotal
+        - total_product_discount
+        - total_coupon_discount
+        + total_shipping
+    )
 
     context = {
         'orders': orders,
         'total_sales_count': total_sales_count,
-        'total_sales_amount': total_sales_amount,
+        'total_sales_amount': total_subtotal,
         'total_product_discount': total_product_discount,
         'total_coupon_discount': total_coupon_discount,
         'total_shipping': total_shipping,
@@ -311,6 +326,7 @@ def sales_report(request):
         'filter_type': filter_type,
     }
     return render(request, 'sales_report.html', context)
+
 
 
 @staff_member_required
