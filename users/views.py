@@ -168,7 +168,6 @@ def resend_otp(request):
 
 #____________________________________________________________________________________________________________________________________#
 
-@login_required
 def forgot_password(request):
     if request.method == 'POST':
         email = request.POST.get('email')
