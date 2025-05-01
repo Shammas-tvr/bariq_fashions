@@ -196,7 +196,7 @@ def forgot_password(request):
 
     return render(request, 'forgot_password.html')
 
-@login_required
+
 def reset_password(request, email):
     if request.method == 'POST':
         new_password = request.POST.get('new_password')

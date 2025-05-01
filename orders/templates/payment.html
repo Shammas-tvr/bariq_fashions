@@ -141,6 +141,7 @@
     }
 
     .payment-method-card:hover {
+        border-color: #252014-10-27T00:00:00.000Z;
         border-color: #25a19b;
         box-shadow: 0 2px 8px rgba(37, 161, 155, 0.1);
     }
@@ -484,16 +485,20 @@
                             <div class="payment-method-description">Pay securely with credit/debit card or UPI</div>
                         </div>
                     </div>
-                    <div class="payment-method-card" data-method="paypal">
+                    <div class="payment-method-card {% if payment_method == 'wallet' %}selected{% else %}{% if not has_sufficient_wallet_balance %}disabled{% endif %}{% endif %}" data-method="wallet">
                         <div class="payment-method-icon">
-                            <i class="fab fa-paypal"></i>
+                            <i class="fas fa-wallet"></i>
                         </div>
                         <div class="payment-method-details">
                             <div class="payment-method-name">
-                                Pay with PayPal
-                                <span class="payment-method-status status-unavailable">Unavailable</span>
+                                Pay with Wallet
+                                {% if has_sufficient_wallet_balance %}
+                                    <span class="payment-method-status status-available">Available (Balance: ₹{{ wallet_balance|floatformat:2 }})</span>
+                                {% else %}
+                                    <span class="payment-method-status status-unavailable">Insufficient Balance (₹{{ wallet_balance|floatformat:2 }})</span>
+                                {% endif %}
                             </div>
-                            <div class="payment-method-description">Pay securely with your PayPal account</div>
+                            <div class="payment-method-description">Pay instantly using your wallet balance</div>
                         </div>
                     </div>
                 </div>
@@ -574,6 +579,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const paymentMethods = document.querySelectorAll('.payment-method-card');
     const isCodAvailable = {% if final_price > 1000 %}true{% else %}false{% endif %};
+    const hasSufficientWalletBalance = {% if has_sufficient_wallet_balance %}true{% else %}false{% endif %};
     let selectedMethod = '{% if payment_method %}{{ payment_method|escapejs }}{% else %}{% if final_price > 1000 %}cod{% else %}razorpay{% endif %}{% endif %}';
     const completePaymentBtn = document.getElementById('completePaymentBtn');
 
@@ -586,8 +592,8 @@ document.addEventListener('DOMContentLoaded', function () {
     paymentMethods.forEach(method => {
         method.addEventListener('click', function () {
             const methodName = this.getAttribute('data-method');
-            if (methodName === 'paypal') {
-                alert('PayPal is not available right now.');
+            if (methodName === 'wallet' && !hasSufficientWalletBalance) {
+                alert('Insufficient wallet balance for this transaction.');
                 return;
             }
             if (methodName === 'cod' && !isCodAvailable) {
@@ -615,12 +621,17 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        completePaymentBtn.disabled = true; // Prevent multiple clicks
+        if (selectedMethod === 'wallet' && !hasSufficientWalletBalance) {
+            alert('Insufficient wallet balance for this transaction.');
+            return;
+        }
+
+        completePaymentBtn.disabled = true;
         completePaymentBtn.textContent = 'Processing...';
 
         if (selectedMethod === 'razorpay') {
             initiateRazorpayPayment();
-        } else if (selectedMethod === 'cod') {
+        } else if (selectedMethod === 'cod' || selectedMethod === 'wallet') {
             processPayment(selectedMethod);
         } else {
             alert('Unsupported payment method: ' + selectedMethod);

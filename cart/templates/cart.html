@@ -12,8 +12,14 @@
   .cart-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: space-between;
     margin-bottom: 2rem;
+  }
+  
+  .cart-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
   
   .cart-header h1 {
@@ -25,6 +31,32 @@
   .item-count {
     color: #666;
     font-size: 1.1rem;
+  }
+  
+  .wishlist-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    color: #666;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .wishlist-button:hover {
+    background: #f8f9fa;
+    color: #ff6b6b;
+    transform: translateY(-1px);
+    border-color: #ff6b6b;
+  }
+  
+  .wishlist-button i {
+    color: #ff6b6b;
   }
   
   .cart-content {
@@ -297,20 +329,42 @@
     margin-bottom: 1rem;
   }
   
-  .continue-shopping {
+  .shopping-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+  }
+  
+  .continue-shopping, .view-wishlist {
     display: inline-block;
     padding: 0.75rem 1.5rem;
-    background: #25a19b;
-    color: white;
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.2s;
     font-weight: 600;
-    margin-top: 1.5rem;
+  }
+  
+  .continue-shopping {
+    background: #25a19b;
+    color: white;
   }
   
   .continue-shopping:hover {
     background: #1c7c77;
+    transform: translateY(-1px);
+  }
+  
+  .view-wishlist {
+    background: white;
+    color: #666;
+    border: 1px solid #ddd;
+  }
+  
+  .view-wishlist:hover {
+    background: #f8f9fa;
+    color: #ff6b6b;
+    border-color: #ff6b6b;
     transform: translateY(-1px);
   }
   
@@ -356,6 +410,21 @@
     .cart-container {
       margin: 1rem auto;
     }
+    
+    .cart-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .cart-title {
+      width: 100%;
+      justify-content: space-between;
+    }
+    
+    .wishlist-button {
+      align-self: flex-start;
+    }
   
     .item-main {
       flex-direction: column;
@@ -376,17 +445,19 @@
       align-items: flex-start;
       gap: 1rem;
     }
-    
-    .remove-item {
-      align-self: flex-start;
-    }
   }
 </style>
 
 <div class="cart-container">
   <div class="cart-header">
-    <h1>Shopping Cart</h1>
-    <span class="item-count">{{ cart_items|length }} Items</span>
+    <div class="cart-title">
+      <h1>Shopping Cart</h1>
+      <span class="item-count">{{ cart_items|length }} Items</span>
+    </div>
+    
+    <a href="{% url 'wishlist_view' %}" class="wishlist-button">
+      <i class="far fa-heart"></i> My Wishlist
+    </a>
   </div>
 
   <div class="cart-content">
@@ -479,7 +550,10 @@
           <i class="fas fa-shopping-cart"></i>
           <h2>Your cart is empty</h2>
           <p>Looks like you haven't added anything to your cart yet.</p>
-          <a href="{% url 'shop_page' %}" class="continue-shopping">Continue Shopping</a>
+          <div class="shopping-actions">
+            <a href="{% url 'shop_page' %}" class="continue-shopping">Continue Shopping</a>
+            <a href="{% url 'wishlist_view' %}" class="view-wishlist">View Wishlist</a>
+          </div>
         </div>
       {% endif %}
     </div>
@@ -585,7 +659,7 @@
   
       // Update quantity
       function updateQuantity(button, action) {
-          const itemId = button.dataset.itemව
+          const itemId = button.dataset.itemId;
   
           const form = button.closest('.update-cart-form');
           const input = form.querySelector('.qty-input');
@@ -688,6 +762,6 @@
           updateButtonStates(input);
       });
   });
-  </script>
+</script>
 
 {% endblock %}

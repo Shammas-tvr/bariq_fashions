@@ -147,7 +147,8 @@ def cancel_order_item(request, order_id, item_id):
         order = order_item.order
         # Check if all items are cancelled
         remaining_items = order.items.exclude(id=item_id)
-        if not remaining_items.exists() or all(item.status == "cancelled" for item in remaining_items):
+        all_items_cancelled = not remaining_items.exists() or all(item.status == "cancelled" for item in remaining_items)
+        if all_items_cancelled:
             order.status = "cancelled"
             order.save()
 
@@ -165,17 +166,23 @@ def cancel_order_item(request, order_id, item_id):
             else:
                 refund_amount = item_total
             
+            # Add shipping cost to refund if all items are cancelled
+            if all_items_cancelled and order.shipping_cost > 0:
+                refund_amount += Decimal(order.shipping_cost)
+                refund_message = f"Item canceled successfully! ₹{refund_amount:.2f} (including shipping cost) has been refunded to your wallet."
+            else:
+                refund_message = f"Item canceled successfully! ₹{refund_amount:.2f} has been refunded to your wallet."
+            
             # Refund to wallet
-            wallet = request.user.wallet  # Updated to lowercase 'wallet' per related_name
+            wallet = request.user.wallet
             wallet.add_balance(refund_amount)
             WalletTransaction.objects.create(
                 wallet=wallet,
                 amount=refund_amount,
-                transaction_type="Credit",  # Match model choice (capitalized)
-                order=order,  # Link to the order
-                description=f"Refund for cancelled order #{order.order_id} item {order_item.id}"
+                transaction_type="Credit",
+                order=order,
+                description=f"Refund for cancelled order #{order.order_id}"
             )
-            refund_message = f"Item canceled successfully! ₹{refund_amount:.2f} has been refunded to your wallet."
         else:
             refund_message = "Item canceled successfully! (COD orders are not refunded)"
 

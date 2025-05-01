@@ -37,6 +37,32 @@
     margin: 0;
 }
 
+.btn-cart {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background-color: var(--white);
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+    text-decoration: none;
+    border-radius: var(--border-radius);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.btn-cart:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+    transform: translateY(-2px);
+}
+
+.btn-cart i {
+    font-size: 16px;
+}
+
 .wishlist-items {
     display: grid;
     gap: 20px;
@@ -258,12 +284,21 @@
     .wishlist-header h1 {
         font-size: 24px;
     }
+    
+    .btn-cart {
+        padding: 8px 15px;
+        font-size: 13px;
+    }
 }
 </style>
 
 <div class="wishlist-container">
     <div class="wishlist-header">
         <h1>My Wishlist</h1>
+        <a href="{% url 'cart_view' %}" class="btn-cart">
+            <i class="fas fa-shopping-cart"></i>
+            View Cart
+        </a>
     </div>
 
     {% if wishlist_items %}

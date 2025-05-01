@@ -1,5 +1,8 @@
 {% extends 'home_base.html' %}
+{% load static %}
+
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
     /* Checkout Container */
@@ -360,22 +363,25 @@
 
     .coupon-section h3 {
         font-size: 16px;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         color: #333;
+        font-weight: 600;
     }
 
     .coupon-form {
         display: flex;
         gap: 10px;
         align-items: center;
+        flex-wrap: wrap;
     }
 
     .coupon-input {
         flex: 1;
-        padding: 8px;
+        padding: 10px;
         border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 14px;
+        min-width: 150px;
     }
 
     .coupon-input:focus {
@@ -384,7 +390,7 @@
     }
 
     .btn-apply-coupon {
-        padding: 8px 16px;
+        padding: 10px 20px;
         background-color: #25a19b;
         color: white;
         border: none;
@@ -398,6 +404,21 @@
         background-color: #208c85;
     }
 
+    .btn-remove-coupon {
+        padding: 10px 20px;
+        background-color: #ff5252;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .btn-remove-coupon:hover {
+        background-color: #ff0000;
+    }
+
     .coupon-message {
         margin-top: 10px;
         font-size: 14px;
@@ -409,6 +430,77 @@
 
     .coupon-message.error {
         color: #ff5252;
+    }
+
+    .coupon-list {
+        margin-top: 20px;
+    }
+
+    .coupon-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        background-color: white;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .coupon-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .coupon-details {
+        flex: 1;
+    }
+
+    .coupon-code {
+        font-weight: bold;
+        font-size: 16px;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .coupon-discount {
+        color: #e53935;
+        font-size: 15px;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .coupon-description {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .coupon-validity {
+        font-size: 12px;
+        color: #999;
+    }
+
+    .coupon-apply-btn {
+        padding: 8px 16px;
+        background-color: #25a19b;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background-color 0.2s;
+    }
+
+    .coupon-apply-btn:hover {
+        background-color: #208c85;
+    }
+
+    .coupon-applied-btn {
+        background-color: #4caf50;
+        cursor: default;
     }
 
     /* Price Summary */
@@ -643,11 +735,17 @@
                 <!-- Coupon Section -->
                 <div class="coupon-section">
                     <h3>Apply Coupon</h3>
-                    <form method="POST" class="coupon-form">
+                    <form method="POST" action="{% url 'checkout' %}" class="coupon-form">
                         {% csrf_token %}
-                        <input type="hidden" name="address" id="selected-address-coupon" value="{{ addresses.0.id }}">
-                        <input type="text" name="coupon_code" class="coupon-input" placeholder="Enter coupon code" value="{{ applied_coupon|default:'' }}">
-                        <button type="submit" class="btn-apply-coupon">Apply</button>
+                        <input type="hidden" name="address" id="selected-address-coupon" value="{{ default_address.id|default:addresses.0.id }}">
+                        <input type="text" name="coupon_code" class="coupon-input" 
+                               placeholder="Enter coupon code" 
+                               value="{% if applied_coupon %}{{ applied_coupon }}{% endif %}">
+                        {% if applied_coupon %}
+                            <button type="submit" name="action" value="remove" class="btn-remove-coupon">Remove</button>
+                        {% else %}
+                            <button type="submit" name="action" value="apply" class="btn-apply-coupon">Apply</button>
+                        {% endif %}
                     </form>
                     {% if messages %}
                         {% for message in messages %}
@@ -655,6 +753,37 @@
                                 {{ message }}
                             </div>
                         {% endfor %}
+                    {% endif %}
+                    {% if available_coupons %}
+                        <div class="coupon-list">
+                            {% for coupon in available_coupons %}
+                                {% if coupon.usage_count < coupon.usage_limit %}
+                                    <div class="coupon-card">
+                                        <div class="coupon-details">
+                                            <div class="coupon-code">{{ coupon.code }}</div>
+                                            <div class="coupon-discount">
+                                                {% if coupon.is_percentage %}
+                                                    {{ coupon.discount }}% off {% if coupon.max_discount %}up to ₹{{ coupon.max_discount }}{% endif %}
+                                                {% else %}
+                                                    ₹{{ coupon.discount }} off
+                                                {% endif %}
+                                            </div>
+                                            <div class="coupon-description">{{ coupon.description|default:"No description available" }}</div>
+                                            <div class="coupon-validity">Valid until {{ coupon.end_date|date:"M d, Y" }}</div>
+                                        </div>
+                                        <form method="POST" action="{% url 'checkout' %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="coupon_code" value="{{ coupon.code }}">
+                                            <input type="hidden" name="address" id="coupon-address-{{ coupon.id }}" value="{{ default_address.id|default:addresses.0.id }}">
+                                            <button type="submit" name="action" value="apply" class="coupon-apply-btn {% if applied_coupon == coupon.code %}coupon-applied-btn{% endif %}" 
+                                                    {% if applied_coupon == coupon.code %}disabled{% endif %}>
+                                                {% if applied_coupon == coupon.code %}Applied{% else %}Apply{% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                     {% endif %}
                 </div>
 
@@ -678,7 +807,7 @@
                     {% endif %}
                     <div class="price-row shipping">
                         <span>Shipping</span>
-                        <span class="price-value">Free</span>
+                        <span class="price-value">{% if shipping_cost == 0 %}Free{% else %}₹{{ shipping_cost }}{% endif %}</span>
                     </div>
                     <div class="price-row total">
                         <span>Total</span>
@@ -689,7 +818,7 @@
                 <form method="POST" action="{% url 'payment' %}">
                     {% csrf_token %}
                     {% with first_address=addresses|first %}
-                        <input type="hidden" name="address" id="selected-address" value="{{ first_address.id }}">
+                        <input type="hidden" name="address" id="selected-address" value="{{ default_address.id|default:first_address.id }}">
                     {% endwith %}
                     <input type="hidden" name="payment_method" value="default_payment_method">
                     <button type="submit" class="btn-place-order">
@@ -705,61 +834,67 @@
     </div>
 </div>
 
-<!-- FontAwesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const addressCards = document.querySelectorAll('.address-card');
+document.addEventListener('DOMContentLoaded', function() {
+    const addressCards = document.querySelectorAll('.address-card');
+    const couponForm = document.querySelector('.coupon-form');
 
-        // Address selection logic
-        addressCards.forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Prevent triggering when clicking buttons/links inside card
-                if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
-                    addressCards.forEach(c => c.classList.remove('selected'));
-                    this.classList.add('selected');
-                    const addressId = this.id.split('-')[1];
-                    // Update both address inputs
-                    document.getElementById('selected-address').value = addressId;
-                    document.getElementById('selected-address-coupon').value = addressId;
+    // Address selection logic
+    addressCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'A') {
+                addressCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                const addressId = this.id.split('-')[1];
+                document.getElementById('selected-address').value = addressId;
+                document.getElementById('selected-address-coupon').value = addressId;
+                document.querySelectorAll('input[id^="coupon-address-"]').forEach(input => {
+                    input.value = addressId;
+                });
+            }
+        });
+    });
+
+    // Set default address logic
+    document.querySelectorAll(".btn-set-default").forEach(button => {
+        button.addEventListener("click", function(e) {
+            e.stopPropagation();
+            const addressId = this.getAttribute("data-address-id");
+
+            fetch("{% url 'set_default_address' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ "address_id": addressId }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll(".btn-set-default").forEach(btn => {
+                        btn.innerText = "Set as Default";
+                        btn.disabled = false;
+                    });
+                    this.innerText = "Default";
+                    this.disabled = true;
+                    addressCards.forEach(card => card.classList.remove('default'));
+                    document.getElementById(`address-${addressId}`).classList.add('default');
+                } else {
+                    alert("Error: " + data.message);
                 }
             });
         });
-
-        // Set default address logic
-        document.querySelectorAll(".btn-set-default").forEach(button => {
-            button.addEventListener("click", function(e) {
-                e.stopPropagation(); // Prevent triggering card selection
-                let addressId = this.getAttribute("data-address-id");
-
-                fetch("{% url 'set_default_address' %}", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": "{{ csrf_token }}",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ "address_id": addressId }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelectorAll(".btn-set-default").forEach(btn => {
-                            btn.innerText = "Set as Default";
-                            btn.disabled = false;
-                        });
-                        this.innerText = "Default";
-                        this.disabled = true;
-
-                        // Update default styling
-                        addressCards.forEach(card => card.classList.remove('default'));
-                        document.getElementById(`address-${addressId}`).classList.add('default');
-                    } else {
-                        alert("Error: " + data.message);
-                    }
-                });
-            });
-        });
     });
+
+    // Coupon form submission handling
+    if (couponForm) {
+        couponForm.addEventListener('submit', function(e) {
+            const addressId = document.getElementById('selected-address').value;
+            const hiddenAddressInput = couponForm.querySelector('input[name="address"]');
+            hiddenAddressInput.value = addressId;
+        });
+    }
+});
 </script>
 {% endblock %}
